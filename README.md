@@ -88,11 +88,14 @@ pip install -r requirements.txt
 ```
 export API_KEY="your-api-key"
 ```
-
-## 3. Usage
+## 3. Export HOME and PATH
+```
+export PATH="$HOME/AutoVisuals/scripts:$PATH"
+```
+## 4. Usage
 ### Basic command
 ```
-python -m autovisuals.get_mj_prompt [options]
+autovisuals generate [options]
 ```
 
 ### Providers
@@ -137,7 +140,7 @@ python -m autovisuals.get_mj_prompt [options]
 -o results
 ```
 
-## 4. Quick examples
+## 5. Quick examples
 ### 1. 5 random records using OpenAI
 ```
 autovisuals generate -p openai -m r -t r -d 5
@@ -155,7 +158,7 @@ autovisuals generate -l my_themes.csv
 autovisuals generate -o results
 ```
 
-## 5. Help
+## 6. Help
 ```
 autovisuals generate --help
 ```

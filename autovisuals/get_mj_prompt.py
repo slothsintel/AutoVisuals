@@ -7,10 +7,10 @@ Part of the AutoVisuals project.
 Script to:
 - load THEMES + WEIGHTS from a csv (theme list)
 - generate adobe-stock-style metadata + midjourney prompts
-- support providers: openai / anthropic / gemini
+- support providers: openai / anthropic / gemini / llama / deepseek
 - use one env var: API_KEY
 - flags:
-    -p provider       (openai / anthropic / gemini)
+    -p provider       (openai / anthropic / gemini / llama / deepseek)
     -l list           (theme list csv, theme,weight)
     -m mode           (random/manual theme)
     -t title          (random/manual title; manual only used in manual theme mode)
