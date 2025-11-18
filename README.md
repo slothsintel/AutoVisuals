@@ -28,11 +28,13 @@
 - 📝 Midjourney-ready prompts   
 - 🔄 Batch generation workflows  
 
-Supports by default:
+Supported API keys:
 
 - OpenAI (GPT‑5.1)  
 - Anthropic (Claude 3.x)  
 - Google Gemini (1.5 Flash)
+- Deepseek ()
+- Meta Llama ()
 
 ---
 

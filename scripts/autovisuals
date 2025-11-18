@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+"""
+AutoVisuals CLI wrapper.
+
+This script just forwards to `python -m autovisuals` so you can run:
+    autovisuals generate ...
+from anywhere.
+"""
+
+import os
+import sys
+import runpy
+
+# Project root = parent directory of this "scripts" folder
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Ensure project root is in sys.path so Python can find the `autovisuals` package
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+
+if __name__ == "__main__":
+    # Equivalent to: python -m autovisuals
+    runpy.run_module("autovisuals", run_name="__main__")

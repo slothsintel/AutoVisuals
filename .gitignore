@@ -210,3 +210,4 @@ __marimo__/
 ignore/*
 ignore/openai_api.txt
 test/*
+prompt/*
