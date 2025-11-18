@@ -1,9 +1,11 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine  
-**A Sloths Visuals Project (by Sloths Intel)**
+<div align="center">
+<img src="docs/logo_light.svg" width="180" alt="AutoVisuals logo" />
+</div>
 
 <div align="center">
-<img src="docs/logo_dark.svg" width="180" alt="AutoVisuals logo" />
+**A Sloths Intel Project (by Sloths Visuals)......**
 </div>
 
 ---
