@@ -5,7 +5,9 @@
 </div>
 
 <div align="center">
-**A Sloths Intel Project (by Sloths Visuals)......**
+
+**A Sloths Intel project (by Sloths Visuals)......**
+
 </div>
 
 ---
