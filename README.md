@@ -1,14 +1,14 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine  
-**A Sloths Visuals Project (by Slothsintel)**
+**A Sloths Visuals Project (by Sloths Intel)**
 
 <div align="center">
-<img src="docs/logo.png" width="180" alt="AutoVisuals logo" />
+<img src="docs/logo_dark.png" width="180" alt="AutoVisuals logo" />
 </div>
 
 ---
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)]()
+[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
 [![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
@@ -19,9 +19,9 @@
 
 **AutoVisuals** is a modular AI engine designed to automatically generate:
 
-- 📝 Midjourney-ready prompts  
-- 🏷 Stock-photo metadata (title, description, 45 keywords)  
-- 🎨 High-quality creative themes  
+- 🎨 High-quality creative themes 
+- 🏷 Adobe Stock style metadata
+- 📝 Midjourney-ready prompts   
 - 🔄 Batch generation workflows  
 
 Supports:
@@ -67,24 +67,24 @@ export API_KEY="your-api-key"
 ## 3. Run AutoVisuals
 ```
 python -m autovisuals.get_mj_prompt \
-    -p openai \
-    -l adobe_cat.csv \
+    -p openai(default) \
+    -l adobe_cat.csv(default) \
     -m r \
     -t r \
     -d 3 \
     -r 5 \
-    -o prompt
+    -o prompt(default)
 ```
 
 Outputs saved to:
 ```
-autovisuals/prompt/<timestamp>/
+prompt/<timestamp>/
 ```
 
 ---
 
 # 🧠 Theme List Format
-
+Themes and its weights are in the same row, seperated by comma.
 ```
 theme,weight
 forest in fog,4
@@ -112,7 +112,17 @@ sunset over mountains,5
   "keywords": ["forest", "...", "generative ai"]
 }
 ```
-
+### Metadata CSV
+```csv
+{
+  "category": "nature",
+  "theme": "forest in fog",
+  "prompt": "futuristic forest scene...",
+  "title": "Mysterious Forest Fog",
+  "description": "A soft atmospheric forest scene.",
+  "keywords": ["forest", "...", "generative ai"]
+}
+```
 ---
 
 # 🧩 Use Inside Python
@@ -125,30 +135,28 @@ print(item["prompt"])
 
 ---
 
-# 🧰 WSL Setup
+# 🧰 WSL/Linux/MacOS setup
 
 ```
 cd ~/projects/AutoVisuals
 pip install -r requirements.txt
-echo 'export API_KEY="sk-openai-xxxxx"' >> ~/.bashrc
+echo 'export API_KEY="your_api_key"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 ---
 
 # 🏗 Future Modules
-
-- Batch pipelines  
-- Prompt ranking  
-- Midjourney API integration  
-- Tagging, CMS export  
+ 
+- Midjourney/Discord API integration  
+- Illustration Scaling  
 - GUI (AutoVisuals Studio)  
 
 ---
 
 # 🤝 Contributing
 
-Maintained by **Slothsintel**, **Sloths Visuals**, and **@drxilu**.
+Maintained by **Sloths Intel**, **Sloths Visuals**, and **@drxilu**.
 
 ---
 
@@ -160,4 +168,4 @@ MIT License.
 
 # 🦥 About Sloths Visuals
 
-A creative technology brand under **Slothsintel**, specialising in automated illustration pipelines.
+A creative visualisation brand under **Sloths Intel**, specialising in data visulisation and automated illustration pipelines.

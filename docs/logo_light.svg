@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="256" cy="230" r="190" fill="#E8F3F8" />
+  <rect x="148" y="210" width="220" height="150" rx="32" ry="32"
+        fill="#FFFFFF" stroke="#102A43" stroke-width="8"/>
+  <path d="M 368 235 C 405 235 428 255 428 285 C 428 315 405 335 368 335"
+        fill="none" stroke="#102A43" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 148 230 Q 256 200 368 230" fill="#FFC857" opacity="0.35"/>
+  <circle cx="255" cy="210" r="70" fill="#F5E0C8" stroke="#C9AE8C" stroke-width="4"/>
+  <ellipse cx="232" cy="205" rx="20" ry="18" fill="#C9AE8C"/>
+  <ellipse cx="278" cy="205" rx="20" ry="18" fill="#C9AE8C"/>
+  <circle cx="232" cy="205" r="6" fill="#102A43"/>
+  <circle cx="278" cy="205" r="6" fill="#102A43"/>
+  <ellipse cx="255" cy="225" rx="16" ry="12" fill="#F3D4B0" stroke="#C9AE8C" stroke-width="3"/>
+  <path d="M 247 228 Q 255 235 263 228" stroke="#102A43" stroke-width="3" fill="none"/>
+  <rect x="148" y="280" width="220" height="20" fill="#00A3A3" opacity="0.85"/>
+  <text x="50%" y="420" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="42" font-weight="600" fill="#102A43">
+    AutoVisuals
+  </text>
+</svg>
