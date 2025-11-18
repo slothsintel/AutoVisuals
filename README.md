@@ -72,49 +72,64 @@ export API_KEY="your-api-key"
 
 ## 3. Usage
 ### Basic command
+```
 python -m autovisuals.get_mj_prompt [options]
+```
 
-### ---- Providers ----
+### Providers
+```
 -p openai
 -p anthropic
 -p gemini
+```
 
-### ---- Theme mode ----
+### Theme mode
+```
 -m r          # random theme (weighted)
 -m m          # manual theme (you will be prompted)
+```
 
-### ---- Title mode ----
+### Title mode
+```
 -t r          # random title
 -t m          # manual title (only valid when -m m)
+```
 
-### ---- Records count ----
+### Records count
+```
 -d 5          # generate 5 records
+```
 
-### ---- Repeats value ----
+### Repeats value
+```
 -r 5          # style repeat value
+```
 
-# ---- Theme list CSV ----
+### heme list CSV
+```
 -l adobe_cat.csv
 -l custom_list.csv
-
-# ---- Output folder ----
+```
+### Output folder
+```
 -o prompt
 -o results
+```
 
 ## 4. Quick examples
-### 1) 5 random records using OpenAI
+### 1. 5 random records using OpenAI
 ```
 python -m autovisuals.get_mj_prompt -p openai -m r -t r -d 5
 ```
-### 2) Manual theme + manual title
+### 2. Manual theme + manual title
 ```
 python -m autovisuals.get_mj_prompt -m m -t m
 ```
-### 3) Use a custom theme list
+### 3. Use a custom theme list
 ```
 python -m autovisuals.get_mj_prompt -l my_themes.csv
 ```
-### 4) Save to custom output directory
+### 4. Save to custom output directory
 ```
 python -m autovisuals.get_mj_prompt -o results
 ```
