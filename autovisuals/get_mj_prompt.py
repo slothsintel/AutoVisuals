@@ -30,6 +30,7 @@ from datetime import datetime
 from openai import OpenAI
 from anthropic import Anthropic
 import google.generativeai as genai
+import requests
 
 
 # ==========================================================
@@ -40,6 +41,9 @@ DEFAULT_PROVIDER = "openai"
 DEFAULT_MODEL_OPENAI = "gpt-5.1"
 DEFAULT_MODEL_CLAUDE = "claude-3-sonnet-latest"
 DEFAULT_MODEL_GEMINI = "gemini-1.5-flash"
+DEFAULT_MODEL_LLAMA = "llama-4-maverick"
+DEFAULT_MODEL_DEEPSEEK = "deepseek-v3"
+
 
 DEFAULT_NUM_ITEMS = 3
 DEFAULT_REPEAT = 5
@@ -214,6 +218,44 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
         result = gemini_client.generate_content(system_prompt + "\n" + user_prompt)
         raw = result.text
 
+    # ---------- llama 4 maverick ----------
+    elif provider == "llama":
+        # Free Llama 4 Maverick endpoint
+        payload = {
+            "model": DEFAULT_MODEL_LLAMA,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+        }
+
+        resp = requests.post(
+            "https://api.llama-api.com/chat/completions",
+            json=payload,
+            timeout=60
+        ).json()
+
+        raw = resp["choices"][0]["message"]["content"]
+    
+    # ---------- deepseek v3 ----------
+    elif provider == "deepseek":
+        # Free Deepseek v3 endpoint
+        payload = {
+            "model": DEFAULT_MODEL_DEEPSEEK,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+        }
+
+        resp = requests.post(
+            "https://api.deepseek.ai/v1/chat/completions",
+            json=payload,
+            timeout=60
+        ).json()
+
+        raw = resp["choices"][0]["message"]["content"]
+    
     else:
         raise ValueError(f"unknown provider: {provider}")
 

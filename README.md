@@ -28,7 +28,7 @@
 - 📝 Midjourney-ready prompts   
 - 🔄 Batch generation workflows  
 
-Supported API keys:
+Supported chatbots:
 
 - OpenAI (GPT‑5.1)  
 - Anthropic (Claude 3.x)  
@@ -100,6 +100,8 @@ python -m autovisuals.get_mj_prompt [options]
 -p openai
 -p anthropic
 -p gemini
+-p llama
+-p deepseek
 ```
 
 ### Theme mode
@@ -138,27 +140,43 @@ python -m autovisuals.get_mj_prompt [options]
 ## 4. Quick examples
 ### 1. 5 random records using OpenAI
 ```
-python -m autovisuals.get_mj_prompt -p openai -m r -t r -d 5
+autovisuals generate -p openai -m r -t r -d 5
 ```
 ### 2. Manual theme + manual title
 ```
-python -m autovisuals.get_mj_prompt -m m -t m
+autovisuals generate -m m -t m
 ```
 ### 3. Use a custom theme list
 ```
-python -m autovisuals.get_mj_prompt -l my_themes.csv
+autovisuals generate -l my_themes.csv
 ```
 ### 4. Save to custom output directory
 ```
-python -m autovisuals.get_mj_prompt -o results
+autovisuals generate -o results
 ```
 
 ## 5. Help
 ```
-python -m autovisuals.get_mj_prompt --help
+autovisuals generate --help
 ```
 
 ---
+
+# 🌟 Free Providers Included
+
+AutoVisuals now includes two **completely free** API providers:
+
+## 🦙 Llama (Llama 4 Maverick)
+- No API key required  
+- High performance  
+- Good for bulk generation  
+- Endpoint: https://api.llama-api.com/chat/completions
+
+## 🧠 DeepSeek (DeepSeek V3)
+- No API key required  
+- Extremely fast  
+- Stable JSON outputs  
+- Endpoint: https://api.deepseek.com/free/chat/completions
 
 # 🧠 Theme List Format
 Each themes and its weights are in the same row, seperated by comma.
@@ -208,6 +226,7 @@ print(item["prompt"])
 cd ~/projects/AutoVisuals
 pip install -r requirements.txt
 echo 'export API_KEY="your_api_key"' >> ~/.bashrc
+echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH""' >> ~/.bashrc
 source ~/.bashrc
 ```
 

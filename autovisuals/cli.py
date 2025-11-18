@@ -26,7 +26,7 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument(
         "-p",
         "--provider",
-        choices=["openai", "anthropic", "gemini"],
+        choices=["openai", "anthropic", "gemini", "llama", "deepseek"],
         default="openai",
         help="LLM provider to use (default: openai)",
     )
