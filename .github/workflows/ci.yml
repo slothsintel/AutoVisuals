@@ -32,7 +32,7 @@ jobs:
 
       - name: Check formatting with black
         run: |
-          black --check autovisuals
+          black --check autovisuals scripts
 
       - name: Run tests with pytest
         run: |
