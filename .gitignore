@@ -207,6 +207,6 @@ marimo/_lsp/
 __marimo__/
 
 # Users and projects data
-.ignore/
-.ignore/openai_api.txt
-.test/
+ignore/
+ignore/openai_api.txt
+test/
