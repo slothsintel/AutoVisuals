@@ -226,17 +226,15 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
-            ]
+            ],
         }
 
         resp = requests.post(
-            "https://api.llama-api.com/chat/completions",
-            json=payload,
-            timeout=60
+            "https://api.llama-api.com/chat/completions", json=payload, timeout=60
         ).json()
 
         raw = resp["choices"][0]["message"]["content"]
-    
+
     # ---------- deepseek v3 ----------
     elif provider == "deepseek":
         # Free Deepseek v3 endpoint
@@ -245,17 +243,15 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
-            ]
+            ],
         }
 
         resp = requests.post(
-            "https://api.deepseek.ai/v1/chat/completions",
-            json=payload,
-            timeout=60
+            "https://api.deepseek.ai/v1/chat/completions", json=payload, timeout=60
         ).json()
 
         raw = resp["choices"][0]["message"]["content"]
-    
+
     else:
         raise ValueError(f"unknown provider: {provider}")
 
