@@ -34,33 +34,63 @@ Supports by default:
 
 # 📁 Project Structure
 
-<div style="overflow-x: auto;">
+<style>
+  .folder { color: #4ea1ff; font-weight: 600; }
+  .file   { color: #c9d1d9; }
+  .hl     { color: #a5d6ff; font-weight: 500; }
+  .tab    { margin-left: 20px; display: block; }
+</style>
 
-<pre>
-AutoVisuals/
-├─ autovisuals/
-│  ├─ __init__.py
-│  ├─ get_mj_prompt.py
-│  ├─ pipelines/
-│  │   └─ (future batch modules)
-│  └─ data/
-│      └─ adobe_cat.csv
-│
-├─ scripts/
-│  ├─ run_get_mj_prompt.py
-│  └─ run_batch_generation.py
-│
-├─ docs/
-│  ├─ logo_light.svg
-│  ├─ logo_dark.svg
-│  └─ index.html
-│
-├─ requirements.txt
-└─ README.md
-</pre>
+<details open>
+  <summary class="folder">AutoVisuals/</summary>
 
-</div>
+  <details>
+    <summary class="folder tab">autovisuals/</summary>
 
+    <div class="tab">
+      <span class="file">└── <span class="hl">__init__.py</span></span><br>
+      <span class="file">└── <span class="hl">get_mj_prompt.py</span></span><br>
+
+      <details>
+        <summary class="folder tab">pipelines/</summary>
+        <div class="tab">
+          <span class="file">└── <span class="hl">(future batch modules)</span></span>
+        </div>
+      </details>
+
+      <details>
+        <summary class="folder tab">data/</summary>
+        <div class="tab">
+          <span class="file">└── <span class="hl">adobe_cat.csv</span></span>
+        </div>
+      </details>
+
+    </div>
+  </details>
+
+  <details>
+    <summary class="folder tab">scripts/</summary>
+    <div class="tab">
+      <span class="file">└── <span class="hl">run_get_mj_prompt.py</span></span><br>
+      <span class="file">└── <span class="hl">run_batch_generation.py</span></span>
+    </div>
+  </details>
+
+  <details>
+    <summary class="folder tab">docs/</summary>
+    <div class="tab">
+      <span class="file">└── <span class="hl">logo_light.svg</span></span><br>
+      <span class="file">└── <span class="hl">logo_dark.svg</span></span><br>
+      <span class="file">└── <span class="hl">index.html</span></span>
+    </div>
+  </details>
+
+  <div class="tab">
+    <span class="file">└── <span class="hl">requirements.txt</span></span><br>
+    <span class="file">└── <span class="hl">README.md</span></span>
+  </div>
+
+</details>
 
 ---
 
@@ -183,6 +213,7 @@ sunset over mountains,5
 }
 ```
 ## Metadata CSV
+
 <div style="overflow-x: auto; white-space: nowrap;">
 
 | category  | theme                                 | prompt | title                                    | description | keywords |
@@ -193,12 +224,13 @@ sunset over mountains,5
 
 </div>
 
-```
+
 ---
 
 # 🧩 Use Inside Python
 
-```python
+```
+python
 from autovisuals.get_mj_prompt import generate_for_theme
 item = generate_for_theme("openai", "misty mountains sunrise", repeat=5)
 print(item["prompt"])
