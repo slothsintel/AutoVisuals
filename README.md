@@ -66,9 +66,11 @@ AutoVisuals/
 # 🚀 Quick Start
 
 ## 1. Install dependencies
+first
 ```
 conda create -n visuals python>=3.14
 ```
+then
 ```
 pip install openai anthropic google-generativeai
 ```
@@ -215,7 +217,7 @@ source ~/.bashrc
 
 # 🤝 Contributing
 
-Maintained by **Sloths Visuals** by [**Sloths Intel**](https://github.com/slothsintel), and [**@drxilu**](https://github.com/drxilu).
+Maintained by **Sloths Visuals** of [**Sloths Intel**](https://github.com/slothsintel), and [**@drxilu**](https://github.com/drxilu).
 
 ---
 
