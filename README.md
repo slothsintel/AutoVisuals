@@ -3,7 +3,7 @@
 **A Sloths Visuals Project (by Sloths Intel)**
 
 <div align="center">
-<img src="docs/logo_dark.png" width="180" alt="AutoVisuals logo" />
+<img src="docs/logo_dark.svg" width="180" alt="AutoVisuals logo" />
 </div>
 
 ---
@@ -24,7 +24,7 @@
 - 📝 Midjourney-ready prompts   
 - 🔄 Batch generation workflows  
 
-Supports:
+Supports by default:
 
 - OpenAI (GPT‑5.1)  
 - Anthropic (Claude 3.x)  
@@ -45,7 +45,7 @@ AutoVisuals/
 │
 ├─ scripts/
 ├─ docs/
-│  └─ logo.png
+│  └─ logo_dark.svg
 ├─ README.md
 └─ requirements.txt
 ```
@@ -56,35 +56,77 @@ AutoVisuals/
 
 ## 1. Install dependencies
 ```
+conda create -n visuals python>=3.14
+```
+```
 pip install openai anthropic google-generativeai
 ```
-
+or
+```
+pip install -r requirements.txt
+```
 ## 2. Export API key
 ```
 export API_KEY="your-api-key"
 ```
 
-## 3. Run AutoVisuals
+## 3. Usage
+### Basic command
+python -m autovisuals.get_mj_prompt [options]
+
+### ---- Providers ----
+-p openai
+-p anthropic
+-p gemini
+
+### ---- Theme mode ----
+-m r          # random theme (weighted)
+-m m          # manual theme (you will be prompted)
+
+### ---- Title mode ----
+-t r          # random title
+-t m          # manual title (only valid when -m m)
+
+### ---- Records count ----
+-d 5          # generate 5 records
+
+### ---- Repeats value ----
+-r 5          # style repeat value
+
+# ---- Theme list CSV ----
+-l adobe_cat.csv
+-l custom_list.csv
+
+# ---- Output folder ----
+-o prompt
+-o results
+
+## 4. Quick examples
+### 1) 5 random records using OpenAI
 ```
-python -m autovisuals.get_mj_prompt \
-    -p openai(default) \
-    -l adobe_cat.csv(default) \
-    -m r \
-    -t r \
-    -d 3 \
-    -r 5 \
-    -o prompt(default)
+python -m autovisuals.get_mj_prompt -p openai -m r -t r -d 5
+```
+### 2) Manual theme + manual title
+```
+python -m autovisuals.get_mj_prompt -m m -t m
+```
+### 3) Use a custom theme list
+```
+python -m autovisuals.get_mj_prompt -l my_themes.csv
+```
+### 4) Save to custom output directory
+```
+python -m autovisuals.get_mj_prompt -o results
 ```
 
-Outputs saved to:
-```
-prompt/<timestamp>/
-```
+## 5. Help
+python -m autovisuals.get_mj_prompt --help
+
 
 ---
 
 # 🧠 Theme List Format
-Themes and its weights are in the same row, seperated by comma.
+Each themes and its weights are in the same row, seperated by comma.
 ```
 theme,weight
 forest in fog,4
@@ -96,12 +138,12 @@ sunset over mountains,5
 
 # 🖥 Example Output
 
-### Midjourney Prompt
+## Midjourney Prompt
 ```
 /imagine prompt futuristic cyber sloth sipping coffee in neon‑lit alley --ar 16:9 --s 20 --c 10 --raw --r 5
 ```
 
-### Metadata JSON
+## Metadata JSON
 ```json
 {
   "category": "nature",
@@ -112,7 +154,7 @@ sunset over mountains,5
   "keywords": ["forest", "...", "generative ai"]
 }
 ```
-### Metadata CSV
+## Metadata CSV
 ```csv
 {
   "category": "nature",
@@ -156,7 +198,7 @@ source ~/.bashrc
 
 # 🤝 Contributing
 
-Maintained by **Sloths Intel**, **Sloths Visuals**, and **@drxilu**.
+Maintained by **Sloths Visuals** by [**Sloths Intel**](https://github.com/slothsintel), and [**@drxilu**](https://github.com/drxilu).
 
 ---
 
