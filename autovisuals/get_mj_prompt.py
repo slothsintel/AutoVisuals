@@ -43,7 +43,7 @@ DEFAULT_MODEL_GEMINI = "gemini-1.5-flash"
 
 DEFAULT_NUM_ITEMS = 3
 DEFAULT_REPEAT = 5
-DEFAULT_LIST_FILE = "adobe_cat.csv"   # under ./data/ by default (theme,weight)
+DEFAULT_LIST_FILE = "adobe_cat.csv"  # under ./data/ by default (theme,weight)
 DEFAULT_OUT_DIR = "prompt"
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -55,9 +55,9 @@ if not API_KEY:
     raise RuntimeError(
         "please export API_KEY before running.\n"
         "examples:\n"
-        "  export API_KEY=\"sk-openai-xxxxx\"   # openai gpt-5.1\n"
-        "  export API_KEY=\"sk-ant-xxxxx\"      # claude 3\n"
-        "  export API_KEY=\"AIza-xxxxx\"        # gemini 1.5\n"
+        '  export API_KEY="sk-openai-xxxxx"   # openai gpt-5.1\n'
+        '  export API_KEY="sk-ant-xxxxx"      # claude 3\n'
+        '  export API_KEY="AIza-xxxxx"        # gemini 1.5\n'
     )
 
 openai_client = None
@@ -277,7 +277,11 @@ return only the json object.
     data = call_model(provider, system_prompt, user_prompt)
 
     # ensure the 'theme' field exists and is at least the given theme if model forgot
-    if "theme" not in data or not isinstance(data["theme"], str) or not data["theme"].strip():
+    if (
+        "theme" not in data
+        or not isinstance(data["theme"], str)
+        or not data["theme"].strip()
+    ):
         data["theme"] = theme
 
     return data
@@ -297,19 +301,25 @@ def save_csv(items, path: Path):
         w = csv.DictWriter(f, fields)
         w.writeheader()
         for it in items:
-            w.writerow({
-                "category": it.get("category", ""),
-                "theme": it.get("theme", ""),
-                "prompt": it.get("prompt", ""),
-                "title": it.get("title", ""),
-                "description": it.get("description", ""),
-                "keywords": ", ".join(it.get("keywords", [])),
-            })
+            w.writerow(
+                {
+                    "category": it.get("category", ""),
+                    "theme": it.get("theme", ""),
+                    "prompt": it.get("prompt", ""),
+                    "title": it.get("title", ""),
+                    "description": it.get("description", ""),
+                    "keywords": ", ".join(it.get("keywords", [])),
+                }
+            )
     print("saved csv :", path)
 
 
 def save_prompts(items, path: Path):
-    lines = [f"/imagine prompt {it.get('prompt', '').strip()}" for it in items if it.get("prompt")]
+    lines = [
+        f"/imagine prompt {it.get('prompt', '').strip()}"
+        for it in items
+        if it.get("prompt")
+    ]
     path.write_text("\n".join(lines), encoding="utf-8")
     print("saved prompts:", path)
 
@@ -462,53 +472,60 @@ examples
 python -m autovisuals.get_mj_prompt -p openai    -l adobe_cat.csv -m r -t r -d 10 -r 5 -o prompt
 python -m autovisuals.get_mj_prompt -p anthropic -l my_themes.csv  -m m -t m -d 5  -r 4 -o results
 python -m autovisuals.get_mj_prompt -p gemini    -l /abs/list.csv  -m r -t r -d 3  -r 2 -o out
-"""
+""",
     )
 
     # order: -p, -l, -m, -t, -d, -r, -o
     p.add_argument(
-        "-p", "--provider",
+        "-p",
+        "--provider",
         choices=["openai", "anthropic", "gemini"],
         default=DEFAULT_PROVIDER,
         help="chatbot api provider",
     )
 
     p.add_argument(
-        "-l", "--list",
+        "-l",
+        "--list",
         default=DEFAULT_LIST_FILE,
         help="theme list csv (theme,weight); relative paths are under autovisuals/data/",
     )
 
     p.add_argument(
-        "-m", "--mode",
+        "-m",
+        "--mode",
         choices=["r", "m", "random", "manual"],
         default="r",
         help="theme mode: random (weighted by csv) or manual",
     )
 
     p.add_argument(
-        "-t", "--title",
+        "-t",
+        "--title",
         choices=["r", "m", "random", "manual"],
         default="r",
         help="title mode: random or manual (manual only used when theme is manual)",
     )
 
     p.add_argument(
-        "-d", "--records",
+        "-d",
+        "--records",
         type=int,
         default=DEFAULT_NUM_ITEMS,
         help=f"number of records to generate (default {DEFAULT_NUM_ITEMS})",
     )
 
     p.add_argument(
-        "-r", "--repeat",
+        "-r",
+        "--repeat",
         type=int,
         default=DEFAULT_REPEAT,
         help=f"value for midjourney --r flag (default {DEFAULT_REPEAT})",
     )
 
     p.add_argument(
-        "-o", "--out",
+        "-o",
+        "--out",
         default=DEFAULT_OUT_DIR,
         help=f"output root folder (default: {DEFAULT_OUT_DIR}/)",
     )
