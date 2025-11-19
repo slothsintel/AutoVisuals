@@ -31,42 +31,49 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     gen.add_argument(
-        "-p", "--provider",
+        "-p",
+        "--provider",
         choices=["openai", "anthropic", "gemini", "llama", "deepseek"],
         default="openai",
         help="LLM provider to use (default: openai)",
     )
     gen.add_argument(
-        "-l", "--list",
+        "-l",
+        "--list",
         default="adobe_cat.csv",
         help="Theme list CSV (theme,weight). Relative paths resolved under autovisuals/data/",
     )
     gen.add_argument(
-        "-m", "--mode",
+        "-m",
+        "--mode",
         choices=["r", "m", "random", "manual"],
         default="r",
         help="Theme mode",
     )
     gen.add_argument(
-        "-t", "--title",
+        "-t",
+        "--title",
         choices=["r", "m", "random", "manual"],
         default="r",
         help="Title mode",
     )
     gen.add_argument(
-        "-d", "--records",
+        "-d",
+        "--records",
         type=int,
         default=3,
         help="How many records to generate (default 3)",
     )
     gen.add_argument(
-        "-r", "--repeat",
+        "-r",
+        "--repeat",
         type=int,
         default=5,
         help="Midjourney --r repeat parameter",
     )
     gen.add_argument(
-        "-o", "--out",
+        "-o",
+        "--out",
         default="prompt",
         help="Output root folder (default: prompt/)",
     )
@@ -78,12 +85,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     discord_cmd.add_argument(
-        "-f", "--file",
+        "-f",
+        "--file",
         default=None,
         help="Path to prompt.txt. If omitted, uses latest timestamp folder.",
     )
     discord_cmd.add_argument(
-        "-w", "--webhook",
+        "-w",
+        "--webhook",
         default=None,
         help="Discord webhook URL. If omitted, reads WEBHOOK_URL env var.",
     )
@@ -125,42 +134,49 @@ def build_parser() -> argparse.ArgumentParser:
 
     # generation options (same as generate)
     pipeline_cmd.add_argument(
-        "-p", "--provider",
+        "-p",
+        "--provider",
         choices=["openai", "anthropic", "gemini", "llama", "deepseek"],
         default="openai",
         help="LLM provider to use (default: openai)",
     )
     pipeline_cmd.add_argument(
-        "-l", "--list",
+        "-l",
+        "--list",
         default="adobe_cat.csv",
         help="Theme list CSV (theme,weight). Relative paths resolved under autovisuals/data/",
     )
     pipeline_cmd.add_argument(
-        "-m", "--mode",
+        "-m",
+        "--mode",
         choices=["r", "m", "random", "manual"],
         default="r",
         help="Theme mode",
     )
     pipeline_cmd.add_argument(
-        "-t", "--title",
+        "-t",
+        "--title",
         choices=["r", "m", "random", "manual"],
         default="r",
         help="Title mode",
     )
     pipeline_cmd.add_argument(
-        "-d", "--records",
+        "-d",
+        "--records",
         type=int,
         default=3,
         help="How many records to generate (default 3)",
     )
     pipeline_cmd.add_argument(
-        "-r", "--repeat",
+        "-r",
+        "--repeat",
         type=int,
         default=5,
         help="Midjourney --r repeat parameter",
     )
     pipeline_cmd.add_argument(
-        "-o", "--out",
+        "-o",
+        "--out",
         default="prompt",
         help="Output root folder (default: prompt/)",
     )
@@ -244,7 +260,9 @@ def main(argv=None) -> None:
 
         webhook = args.webhook or os.environ.get("WEBHOOK_URL")
         if not webhook:
-            raise ValueError("No webhook provided. Use -w or set WEBHOOK_URL env variable.")
+            raise ValueError(
+                "No webhook provided. Use -w or set WEBHOOK_URL env variable."
+            )
 
         send_prompt_file(prompt_path, webhook)
 
