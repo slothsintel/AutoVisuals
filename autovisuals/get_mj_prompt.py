@@ -121,19 +121,15 @@ def load_themes_with_weights(csv_path: Path):
 # 3. system prompt
 # ==========================================================
 def make_system_prompt(repeat: int) -> str:
-    """
-    system prompt sets schema + rules.
-    note: category is free; theme is provided separately.
-    """
     return f"""
-you generate metadata and midjourney prompts.
+you generate metadata and midjourney prompt content.
 
 you must return valid json:
 
 {{
   "category": "string",
   "theme": "string",
-  "prompt": "string",
+  "prompt": "string",             # do NOT include '/imagine prompt:' prefix — we add it automatically
   "title": "string",
   "description": "string",
   "keywords": [...]
@@ -143,7 +139,8 @@ rules:
 - category: broad stock-photo category that fits the theme (e.g. nature, business, people)
 - theme: keep or lightly refine the given theme text
 - prompt:
-    - detailed midjourney prompt ready for `/imagine prompt `
+    - detailed midjourney content to append after '/imagine prompt:'
+    - DO NOT include '/imagine prompt:' — only the content itself
     - include subject, environment, composition, style, lighting, mood, camera hints
     - must end with: --ar 16:9 --s 20 --c 10 --raw --r {repeat}
 - title:
@@ -159,6 +156,7 @@ rules:
 
 return only the json object, nothing else.
 """
+
 
 
 # ==========================================================
@@ -314,6 +312,11 @@ return only the json object.
 """
     data = call_model(provider, system_prompt, user_prompt)
 
+    # normalize prompt to have correct /imagine prompt: prefix
+    if "prompt" in data and isinstance(data["prompt"], str):
+        data["prompt"] = normalize_mj_prefix(data["prompt"])
+
+
     # ensure the 'theme' field exists and is at least the given theme if model forgot
     if (
         "theme" not in data
@@ -354,7 +357,7 @@ def save_csv(items, path: Path):
 
 def save_prompts(items, path: Path):
     lines = [
-        f"/imagine prompt {it.get('prompt', '').strip()}"
+        normalize_mj_prefix(it.get("prompt", ""))
         for it in items
         if it.get("prompt")
     ]
@@ -582,3 +585,45 @@ if __name__ == "__main__":
         repeat=args.repeat,
         out_arg=args.out,
     )
+
+# ==========================================================
+# 10. mj prompt normalizer
+# ==========================================================
+def normalize_mj_prefix(prompt: str) -> str:
+    """
+    Ensure the prompt begins with exactly:
+        /imagine prompt:
+    Handles:
+        - existing /imagine prompt:
+        - /imagine prompt (no colon)
+        - imagine prompt:
+        - imagine prompt
+        - no prefix at all
+    """
+    s = prompt.strip()
+
+    # Lowercase version to check prefix
+    low = s.lower()
+
+    # If already correct (any case) — normalize spacing only
+    if low.startswith("/imagine prompt:"):
+        rest = s[len("/imagine prompt:"):].lstrip()
+        return f"/imagine prompt: {rest}"
+
+    # Missing the colon
+    if low.startswith("/imagine prompt"):
+        rest = s[len("/imagine prompt"):].lstrip(": ").lstrip()
+        return f"/imagine prompt: {rest}"
+
+    # Missing the slash but has "imagine prompt:"
+    if low.startswith("imagine prompt:"):
+        rest = s[len("imagine prompt:"):].lstrip()
+        return f"/imagine prompt: {rest}"
+
+    # Missing slash & colon
+    if low.startswith("imagine prompt"):
+        rest = s[len("imagine prompt"):].lstrip(": ").lstrip()
+        return f"/imagine prompt: {rest}"
+
+    # No prefix at all
+    return f"/imagine prompt: {s}"
