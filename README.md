@@ -5,8 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 [![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)]()
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
-![Static Badge](https://img.shields.io/badge/chatbot-openai%20%7C%20claude%20%7C%20gemini%20%7C%20deepseek%20%7C%20llama-purple)
-![Sloths Visuals](https://img.shields.io/badge/Sloths_Visuals-Powered-4ea1ff?style=flat-square)
+[![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
+[![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
 <div align="center">
 <img src="docs/autovisuals_hex_icon_simple.svg" width="180" alt="AutoVisuals logo" />
 </div>
@@ -137,7 +137,7 @@ autovisuals generate [options]
 -o results
 ```
 
-## 5. Quick examples
+## Quick examples
 ### Using gemini to create 5 records
 ```
 autovisuals generate -p gemini -m r -t r -d 5
