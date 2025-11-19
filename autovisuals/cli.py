@@ -76,14 +76,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Send prompts to Discord using a webhook. Defaults to latest folder + WEBHOOK_URL env.",
     )
     discord_cmd.add_argument(
-        "-f", "--file",
+        "-f",
+        "--file",
         default=None,
-        help="Path to prompt.txt. If omitted, uses the latest timestamp folder automatically."
+        help="Path to prompt.txt. If omitted, uses the latest timestamp folder automatically.",
     )
     discord_cmd.add_argument(
-        "-w", "--webhook",
+        "-w",
+        "--webhook",
         default=None,
-        help="Discord webhook URL. If omitted, reads from WEBHOOK_URL environment variable."
+        help="Discord webhook URL. If omitted, reads from WEBHOOK_URL environment variable.",
     )
     return parser
 
@@ -115,9 +117,12 @@ def main(argv=None) -> None:
         # Determine webhook
         webhook = args.webhook or os.environ.get("WEBHOOK_URL")
         if not webhook:
-            raise ValueError("No webhook provided. Use -w or set WEBHOOK_URL env variable.")
+            raise ValueError(
+                "No webhook provided. Use -w or set WEBHOOK_URL env variable."
+            )
 
         send_prompt_file(prompt_path, webhook)
+
 
 if __name__ == "__main__":
     main()
