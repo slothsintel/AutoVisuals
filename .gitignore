@@ -211,3 +211,5 @@ ignore/*
 ignore/openai_api.txt
 test/*
 prompt/*
+mj_downloads/*
+mj_gallery

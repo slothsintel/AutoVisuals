@@ -588,39 +588,30 @@ if __name__ == "__main__":
 # ==========================================================
 def normalize_mj_prefix(prompt: str) -> str:
     """
-    Ensure the prompt begins with exactly:
-        /imagine prompt:
-    Handles:
-        - existing /imagine prompt:
-        - /imagine prompt (no colon)
-        - imagine prompt:
-        - imagine prompt
-        - no prefix at all
+    Ensure the prompt begins with exactly '/imagine prompt:' (no trailing space).
     """
     s = prompt.strip()
-
-    # Lowercase version to check prefix
     low = s.lower()
 
-    # If already correct (any case) — normalize spacing only
+    # already correct → remove any spaces after colon
     if low.startswith("/imagine prompt:"):
-        rest = s[len("/imagine prompt:") :].lstrip()
-        return f"/imagine prompt: {rest}"
+        rest = s[len("/imagine prompt:"):].lstrip()  # remove the space after colon
+        return f"/imagine prompt:{rest}"
 
-    # Missing the colon
+    # missing colon but starts with prefix
     if low.startswith("/imagine prompt"):
-        rest = s[len("/imagine prompt") :].lstrip(": ").lstrip()
-        return f"/imagine prompt: {rest}"
+        rest = s[len("/imagine prompt"):].lstrip(": ").lstrip()
+        return f"/imagine prompt:{rest}"
 
-    # Missing the slash but has "imagine prompt:"
+    # missing slash
     if low.startswith("imagine prompt:"):
-        rest = s[len("imagine prompt:") :].lstrip()
-        return f"/imagine prompt: {rest}"
+        rest = s[len("imagine prompt:"):].lstrip()
+        return f"/imagine prompt:{rest}"
 
-    # Missing slash & colon
     if low.startswith("imagine prompt"):
-        rest = s[len("imagine prompt") :].lstrip(": ").lstrip()
-        return f"/imagine prompt: {rest}"
+        rest = s[len("imagine prompt"):].lstrip(": ").lstrip()
+        return f"/imagine prompt:{rest}"
 
-    # No prefix at all
-    return f"/imagine prompt: {s}"
+    # no prefix at all
+    return f"/imagine prompt:{s}"
+
