@@ -3,8 +3,8 @@
 [![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
 [![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
-[![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)]()
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
+[![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 [![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
 <div align="center">
