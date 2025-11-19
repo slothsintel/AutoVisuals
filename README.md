@@ -1,7 +1,14 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine  
+[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
+[![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
+[![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)]()
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
+![Static Badge](https://img.shields.io/badge/chatbot-openai%20%7C%20claude%20%7C%20gemini%20%7C%20deepseek%20%7C%20llama-purple)
+![Sloths Visuals](https://img.shields.io/badge/Sloths_Visuals-Powered-4ea1ff?style=flat-square)
 <div align="center">
-<img src="docs/logo_light.svg" width="180" alt="AutoVisuals logo" />
+<img src="docs/autovisuals_hex_icon_simple.svg" width="180" alt="AutoVisuals logo" />
 </div>
 
 <div align="center">
@@ -9,13 +16,6 @@
 **A Sloths Intel project (by Sloths Visuals)......**
 
 </div>
-
----
-
-[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
-[![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
 
 ---
 
@@ -27,14 +27,6 @@
 - 🏷 Adobe Stock style metadata
 - 📝 Midjourney-ready prompts   
 - 🔄 Batch generation workflows  
-
-Supported chatbots:
-
-- OpenAI (GPT‑5.1)  
-- Anthropic (Claude 3.x)  
-- Google Gemini (1.5 Flash)
-- Deepseek ()
-- Meta Llama ()
 
 ---
 
@@ -71,7 +63,7 @@ AutoVisuals/
 
 # 🚀 Quick Start
 
-## 1. Install dependencies
+## Install dependencies
 first
 ```
 conda create -n visuals python>=3.14
@@ -84,15 +76,20 @@ or
 ```
 pip install -r requirements.txt
 ```
-## 2. Export API key
+## Export API key if you use paid chatbot
+in your `.bashrc`, add
 ```
 export API_KEY="your-api-key"
 ```
-## 3. Export HOME and PATH
+## Export $HOME and $PATH
 ```
 export PATH="$HOME/AutoVisuals/scripts:$PATH"
 ```
-## 4. Usage
+do not forget to source your `.bashrc`
+```
+source ~/.bashrc
+```
+## Usage
 ### Basic command
 ```
 autovisuals generate [options]
@@ -141,24 +138,24 @@ autovisuals generate [options]
 ```
 
 ## 5. Quick examples
-### 1. 5 random records using OpenAI
+### Using gemini to create 5 records
 ```
-autovisuals generate -p openai -m r -t r -d 5
+autovisuals generate -p gemini -m r -t r -d 5
 ```
-### 2. Manual theme + manual title
+### Manual theme + manual title
 ```
 autovisuals generate -m m -t m
 ```
-### 3. Use a custom theme list
+### Use a custom theme list
 ```
 autovisuals generate -l my_themes.csv
 ```
-### 4. Save to custom output directory
+### Save to custom output directory
 ```
 autovisuals generate -o results
 ```
 
-## 6. Help
+## Help
 ```
 autovisuals generate --help
 ```
@@ -181,13 +178,16 @@ AutoVisuals now includes two **completely free** API providers:
 - Stable JSON outputs  
 - Endpoint: https://api.deepseek.com/free/chat/completions
 
-# 🧠 Theme List Format
+---
+
+# 🧰 Theme List Format
 Each themes and its weights are in the same row, seperated by comma.
 ```
 theme,weight
 forest in fog,4
 business teamwork,3
 sunset over mountains,5
+......
 ```
 
 ---
@@ -212,18 +212,7 @@ sunset over mountains,5
 ```
 ---
 
-# 🧩 Use Inside Python
-
-```
-python
-from autovisuals.get_mj_prompt import generate_for_theme
-item = generate_for_theme("openai", "misty mountains sunrise", repeat=5)
-print(item["prompt"])
-```
-
----
-
-# 🧰 WSL/Linux/MacOS setup
+#  WSL/Linux/MacOS setup
 
 ```
 cd ~/projects/AutoVisuals

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 512 512"
+     xmlns="http://www.w3.org/2000/svg">
+  <polygon
+    points="256,40 448,144 448,344 256,448 64,344 64,144"
+    fill="none"
+    stroke="#22D3EE"
+    stroke-width="24"
+    stroke-linejoin="round" />
+  <ellipse cx="256" cy="256" rx="96" ry="82"
+           fill="#F5E9D9" />
+  <ellipse cx="226" cy="250" rx="30" ry="24" fill="#C58A5A" />
+  <ellipse cx="286" cy="250" rx="30" ry="24" fill="#C58A5A" />
+  <circle cx="226" cy="250" r="8" fill="#111827" />
+  <circle cx="286" cy="250" r="8" fill="#111827" />
+  <ellipse cx="256" cy="266" rx="10" ry="8" fill="#111827" />
+  <path d="M 238 280 Q 256 290 274 280"
+        fill="none"
+        stroke="#111827"
+        stroke-width="5"
+        stroke-linecap="round" />
+</svg>
