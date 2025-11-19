@@ -158,7 +158,6 @@ return only the json object, nothing else.
 """
 
 
-
 # ==========================================================
 # 4. multi-provider model caller
 # ==========================================================
@@ -316,7 +315,6 @@ return only the json object.
     if "prompt" in data and isinstance(data["prompt"], str):
         data["prompt"] = normalize_mj_prefix(data["prompt"])
 
-
     # ensure the 'theme' field exists and is at least the given theme if model forgot
     if (
         "theme" not in data
@@ -357,9 +355,7 @@ def save_csv(items, path: Path):
 
 def save_prompts(items, path: Path):
     lines = [
-        normalize_mj_prefix(it.get("prompt", ""))
-        for it in items
-        if it.get("prompt")
+        normalize_mj_prefix(it.get("prompt", "")) for it in items if it.get("prompt")
     ]
     path.write_text("\n".join(lines), encoding="utf-8")
     print("saved prompts:", path)
@@ -586,6 +582,7 @@ if __name__ == "__main__":
         out_arg=args.out,
     )
 
+
 # ==========================================================
 # 10. mj prompt normalizer
 # ==========================================================
@@ -607,22 +604,22 @@ def normalize_mj_prefix(prompt: str) -> str:
 
     # If already correct (any case) — normalize spacing only
     if low.startswith("/imagine prompt:"):
-        rest = s[len("/imagine prompt:"):].lstrip()
+        rest = s[len("/imagine prompt:") :].lstrip()
         return f"/imagine prompt: {rest}"
 
     # Missing the colon
     if low.startswith("/imagine prompt"):
-        rest = s[len("/imagine prompt"):].lstrip(": ").lstrip()
+        rest = s[len("/imagine prompt") :].lstrip(": ").lstrip()
         return f"/imagine prompt: {rest}"
 
     # Missing the slash but has "imagine prompt:"
     if low.startswith("imagine prompt:"):
-        rest = s[len("imagine prompt:"):].lstrip()
+        rest = s[len("imagine prompt:") :].lstrip()
         return f"/imagine prompt: {rest}"
 
     # Missing slash & colon
     if low.startswith("imagine prompt"):
-        rest = s[len("imagine prompt"):].lstrip(": ").lstrip()
+        rest = s[len("imagine prompt") :].lstrip(": ").lstrip()
         return f"/imagine prompt: {rest}"
 
     # No prefix at all
