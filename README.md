@@ -13,9 +13,7 @@
 
 <div align="center">
 
-**AutoVisuals** is a fully automated pipeline for generating **Midjourney-ready prompts**, sending them to **Discord**, automatically **downloading and splitting MJ images**, and building a beautiful **HTML gallery** with zoom navigation.
-
-Designed for **Sloths Visuals (SlothsIntel)**, this tool allows one-click production of consistent, stock-ready illustration batches for Adobe Stock or internal datasets.
+**AutoVisuals** designed by **Sloths Visuals (SlothsIntel)**, is a fully automated pipeline for generating **Midjourney-ready prompts**, sending them to **Discord**, automatically **downloading and splitting MJ images**, and building a beautiful **HTML gallery** with zoom navigation, for business design, internal datasets, Adobe Stock, or other illustration stocks.
 
 </div>
 
@@ -24,41 +22,34 @@ Designed for **Sloths Visuals (SlothsIntel)**, this tool allows one-click produc
 # ⭐ Features
 
 ### 🔮 Prompt & Metadata Generator
-- Generates **category**, **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
-- Supports multiple LLM providers:
-  - OpenAI GPT-5.1  
-  - Claude 3 Sonnet  
-  - Gemini 1.5  
-  - Llama 4 Maverick (free)  
-  - DeepSeek-V3 (free)
-- Auto-attaches `[av:id]` tags for later category mapping.
+- Generates output: **category**, **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
+- Supports output formats: **txt**, **csv**, and **json**
 
 ### 🤖 Discord Automation
 - Sends each prompt line to any Discord channel via **webhook**.
 - Confirms each prompt in your private server with [one click]().
 - Downloads MJ bot images via **Discord bot token**.
-- Auto-splits 2×2 grids into 4 tiles.  
-- Auto-categorises images using `[av:id]`.
+- Auto-splits 2×2 grids into 4 tiles.
 
 ### 🖼️ HTML Gallery Builder
-- Builds a polished responsive gallery:
+- Builds a techno-tidy responsive gallery:
   - Date → Category → Images  
 - Zoom mode includes:
-  - **Prev/Next buttons**  
-  - **Mouse wheel navigation (up = prev, down = next)**  
-  - **Keyboard ← → arrows**  
-  - **Back to Gallery button**
+  - **Prev/Next navigation**  
+  - **Back to Gallery**
 
 ### 🚀 Full Pipeline Command
+Run
 ```
 autovisuals pipeline
 ```
-Runs:
+Return:
 ```
 generate → send → download → split → gallery
 ```
 
 ### 📊 Status Summary
+Run
 ```
 autovisuals status
 ```
@@ -79,9 +70,9 @@ cd AutoVisuals
 pip install -r requirements.txt
 ```
 
-### Add to PATH (WSL recommended)
+### Add to PATH
 ```bash
-echo 'export PATH="$PATH:/mnt/c/Users/xilu/OneDrive/bus/slothsintel/slothsvisuals/AutoVisuals/scripts"' >> ~/.bashrc
+echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -89,17 +80,17 @@ source ~/.bashrc
 
 # 🔐 Required Environment Variables
 
-### For prompt generation:
+### For prompt generation, where to get [openai api]():
 ```
 export API_KEY="your LLM API key"
 ```
 
-### For Discord prompt sending:
+### For Discord prompt sending, where to get [discord webhook]():
 ```
 export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
-### For Discord image downloading:
+### For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
 ```
 export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
@@ -111,92 +102,153 @@ export MJ_CHANNEL_ID="123456789012345678"
 
 ---
 
-## 1️⃣ Generate prompts & metadata
+Run
 
 ```
-autovisuals generate -d 3 -p openai
+autovisuals -h
 ```
 
-Outputs:
+Output
 
 ```
-prompt/YYYY-MM-DD/category/
-   ├── meta.json
-   ├── meta.csv
-   └── prompt.txt
-```
+usage: autovisuals [-h] {generate,discord,download,gallery,pipeline,status} ...
 
----
+AutoVisuals – automatic prompt & gallery pipeline.
 
-## 2️⃣ Send prompts to Discord
+positional arguments:
+  {generate,discord,download,gallery,pipeline,status}
+    generate            Generate prompts + metadata.
+    discord             Send prompts to Discord webhook.
+    download            Download Midjourney images.
+    gallery             Build HTML gallery.
+    pipeline            Full pipeline: generate → send → download → gallery.
+    status              Show a tiny summary of prompts + images per date/category.
 
-```
-autovisuals discord --all-categories
-```
-
-or send latest category:
-
-```
-autovisuals discord
+options:
+  -h, --help            show this help message and exit
 ```
 
 ---
 
-## 3️⃣ Download Midjourney images
+Run
 
 ```
-autovisuals download
+autovisuals generate -h
 ```
 
-The downloader:
-- Watches your MJ channel  
-- Automatically fetches new images  
-- Splits 2×2 → 4 images  
-- Categorises using `[av:id]`  
+Output
 
-Idle timeout default: **180 seconds**
+```
+usage: autovisuals generate [-h] [-p PROVIDER] [-l LIST] [-m MODE] [-t TITLE] [-d RECORDS] [-r REPEAT] [-o OUT]
+
+options:
+  -h, --help            show this help message and exit
+  -p, --provider PROVIDER
+  -l, --list LIST
+  -m, --mode MODE
+  -t, --title TITLE
+  -d, --records RECORDS
+  -r, --repeat REPEAT
+  -o, --out OUT
+```
 
 ---
 
-## 4️⃣ Generate HTML gallery
+Run
 
 ```
-autovisuals gallery
+autovisuals discord -h
 ```
 
-Outputs:
+Output
 
 ```
-mj_gallery.html
-mj_zoom/date/category/image.html
-```
+usage: autovisuals discord [-h] [-w WEBHOOK] [--category CATEGORY] [--all-categories]
 
-With:
-- Clickable thumbnails  
-- Zoom view  
-- Keyboard ← →  
-- Mouse wheel navigation  
-- Smooth UX  
+options:
+  -h, --help            show this help message and exit
+  -w, --webhook WEBHOOK
+                        Webhook URL (or WEBHOOK_URL env).
+  --category CATEGORY   Specific category slug to send.
+  --all-categories      Send prompts for all categories for latest date.
+```
 
 ---
 
-## 5️⃣ Full Pipeline
+Run
 
 ```
-autovisuals pipeline
+autovisuals download -h
 ```
 
-Runs everything:
+Outputs
 
 ```
-(1) generate  
-(2) send to discord  
-(3) download & split  
-(4) build gallery  
+usage: autovisuals download [-h] [-t TOKEN] [-c CHANNEL_ID] [-o OUT] [--limit LIMIT] [--idle-seconds IDLE_SECONDS]
+
+options:
+  -h, --help            show this help message and exit
+  -t, --token TOKEN     Discord bot token (or DISCORD_BOT_TOKEN).
+  -c, --channel-id CHANNEL_ID
+                        Discord channel id (or MJ_CHANNEL_ID).
+  -o, --out OUT         Download root folder.
+  --limit LIMIT         Stop after N images (default: no limit).
+  --idle-seconds IDLE_SECONDS
+                        Auto-stop after this many seconds of inactivity (default: 180). Use 0 to disable.
+```
+---
+
+Run
+
+```
+autovisuals gallery -h
 ```
 
-Zero manual file work.
+Outputs
 
+```
+usage: autovisuals gallery [-h] [--download-dir DOWNLOAD_DIR] [--prompt-dir PROMPT_DIR] [--out OUT]
+
+options:
+  -h, --help            show this help message and exit
+  --download-dir DOWNLOAD_DIR
+                        MJ image root.
+  --prompt-dir PROMPT_DIR
+                        Prompt root.
+  --out OUT             Gallery HTML output file.
+```
+---
+
+Run all above in a pipeline
+
+```
+autovisuals pipeline -h
+```
+
+Outputs
+
+```
+usage: autovisuals pipeline [-h] [-p PROVIDER] [-l LIST] [-m MODE] [-t TITLE] [-d RECORDS] [-r REPEAT] [-o OUT] [-w WEBHOOK]
+                            [--download-dir DOWNLOAD_DIR] [--gallery-out GALLERY_OUT] [--idle-seconds IDLE_SECONDS]
+
+options:
+  -h, --help            show this help message and exit
+  -p, --provider PROVIDER
+  -l, --list LIST
+  -m, --mode MODE
+  -t, --title TITLE
+  -d, --records RECORDS
+  -r, --repeat REPEAT
+  -o, --out OUT         Prompt output root (used also as prompt_dir for gallery).
+  -w, --webhook WEBHOOK
+                        Webhook URL (or WEBHOOK_URL env).
+  --download-dir DOWNLOAD_DIR
+                        Download directory for images.
+  --gallery-out GALLERY_OUT
+                        Output gallery HTML file.
+  --idle-seconds IDLE_SECONDS
+                        Downloader idle timeout in seconds (default: 180).
+```
 ---
 
 # 📊 Status Command
