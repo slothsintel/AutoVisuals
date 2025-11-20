@@ -40,8 +40,8 @@ import requests
 # Project / paths
 # ------------------------------------------------------------------
 
-BASE_DIR = Path(__file__).resolve().parent          # autovisuals/
-PROJECT_ROOT = BASE_DIR.parent                      # AutoVisuals/
+BASE_DIR = Path(__file__).resolve().parent  # autovisuals/
+PROJECT_ROOT = BASE_DIR.parent  # AutoVisuals/
 
 DEFAULT_PROVIDER = "openai"
 DEFAULT_MODEL_OPENAI = "gpt-5.1"
@@ -52,7 +52,7 @@ DEFAULT_MODEL_DEEPSEEK = "deepseek-v3"
 
 DEFAULT_NUM_ITEMS = 3
 DEFAULT_REPEAT = 5
-DEFAULT_LIST_FILE = "adobe_cat.csv"                 # inside autovisuals/data
+DEFAULT_LIST_FILE = "adobe_cat.csv"  # inside autovisuals/data
 DEFAULT_OUT_DIR = "prompt"
 
 API_KEY = os.getenv("API_KEY")
@@ -73,6 +73,7 @@ gemini_client = None
 # ------------------------------------------------------------------
 # Theme loader
 # ------------------------------------------------------------------
+
 
 def load_themes_with_weights(csv_path: Path):
     """
@@ -122,6 +123,7 @@ def load_themes_with_weights(csv_path: Path):
 # MJ helpers
 # ------------------------------------------------------------------
 
+
 def normalize_mj_prefix(prompt: str) -> str:
     """
     Ensure the prompt begins with exactly '/imagine prompt:' (no trailing space).
@@ -131,19 +133,19 @@ def normalize_mj_prefix(prompt: str) -> str:
     low = s.lower()
 
     if low.startswith("/imagine prompt:"):
-        rest = s[len("/imagine prompt:"):].lstrip()
+        rest = s[len("/imagine prompt:") :].lstrip()
         return f"/imagine prompt:{rest}"
 
     if low.startswith("/imagine prompt"):
-        rest = s[len("/imagine prompt"):].lstrip(": ").lstrip()
+        rest = s[len("/imagine prompt") :].lstrip(": ").lstrip()
         return f"/imagine prompt:{rest}"
 
     if low.startswith("imagine prompt:"):
-        rest = s[len("imagine prompt:"):].lstrip()
+        rest = s[len("imagine prompt:") :].lstrip()
         return f"/imagine prompt:{rest}"
 
     if low.startswith("imagine prompt"):
-        rest = s[len("imagine prompt"):].lstrip(": ").lstrip()
+        rest = s[len("imagine prompt") :].lstrip(": ").lstrip()
         return f"/imagine prompt:{rest}"
 
     return f"/imagine prompt:{s}"
@@ -192,6 +194,7 @@ def generate_id(existing_ids: set[str]) -> str:
 # System prompt
 # ------------------------------------------------------------------
 
+
 def make_system_prompt(repeat: int) -> str:
     return f"""
 you generate metadata and midjourney prompt content.
@@ -233,6 +236,7 @@ return only the json object, nothing else.
 # ------------------------------------------------------------------
 # Multi-provider call
 # ------------------------------------------------------------------
+
 
 def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
     """
@@ -363,6 +367,7 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
 # Core generation
 # ------------------------------------------------------------------
 
+
 def generate_for_theme(provider: str, theme: str, repeat: int) -> dict:
     system_prompt = make_system_prompt(repeat)
     user_prompt = f"""
@@ -391,6 +396,7 @@ return only the json object.
 # ------------------------------------------------------------------
 # Save helpers
 # ------------------------------------------------------------------
+
 
 def save_json(items, path: Path):
     path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -432,6 +438,7 @@ def save_prompts(items, path: Path):
 # Path helpers
 # ------------------------------------------------------------------
 
+
 def resolve_list_path(list_arg: str) -> Path:
     p = Path(list_arg)
     if p.is_absolute():
@@ -449,6 +456,7 @@ def resolve_output_root(out_arg: str) -> Path:
 # ------------------------------------------------------------------
 # Public main() used by cli.py
 # ------------------------------------------------------------------
+
 
 def main(
     provider: str,
@@ -566,6 +574,7 @@ def main(
 # ------------------------------------------------------------------
 # Stand-alone usage (optional)
 # ------------------------------------------------------------------
+
 
 def parse_args():
     p = argparse.ArgumentParser(

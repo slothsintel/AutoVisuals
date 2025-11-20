@@ -41,6 +41,7 @@ DEFAULT_IDLE_SECONDS = 180  # 3 minutes default idle timeout
 # Helpers for prompt paths
 # ------------------------------------------------------------------
 
+
 def get_prompt_root() -> Path:
     return PROJECT_ROOT / DEFAULT_OUT_PROMPT
 
@@ -72,6 +73,7 @@ def get_prompt_file_for(date: str, category_slug: str) -> Path:
 # ------------------------------------------------------------------
 # Parser
 # ------------------------------------------------------------------
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -124,7 +126,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=DEFAULT_IDLE_SECONDS,
         help=f"Auto-stop after this many seconds of inactivity (default: {DEFAULT_IDLE_SECONDS}). "
-             "Use 0 to disable.",
+        "Use 0 to disable.",
     )
 
     # gallery
@@ -213,6 +215,7 @@ def build_parser() -> argparse.ArgumentParser:
 # Status helper
 # ------------------------------------------------------------------
 
+
 def run_status(prompt_dir: str, download_dir: str, only_date: str | None):
     prompt_root = PROJECT_ROOT / prompt_dir
     download_root = PROJECT_ROOT / download_dir
@@ -274,19 +277,16 @@ def run_status(prompt_dir: str, download_dir: str, only_date: str | None):
             total_prompts += prompts_count
             total_images += images_count
 
-            print(
-                f"{date:<12} {cat:<20.20} {prompts_count:>8} {images_count:>8}"
-            )
+            print(f"{date:<12} {cat:<20.20} {prompts_count:>8} {images_count:>8}")
 
     print("-" * len(header))
-    print(
-        f"{'TOTAL':<12} {'':<20} {total_prompts:>8} {total_images:>8}"
-    )
+    print(f"{'TOTAL':<12} {'':<20} {total_prompts:>8} {total_images:>8}")
 
 
 # ------------------------------------------------------------------
 # Main dispatch
 # ------------------------------------------------------------------
+
 
 def main():
     parser = build_parser()
@@ -335,7 +335,9 @@ def main():
         send_prompt_file(pf, webhook)
 
     elif args.command == "download":
-        idle = args.idle_seconds if args.idle_seconds and args.idle_seconds > 0 else None
+        idle = (
+            args.idle_seconds if args.idle_seconds and args.idle_seconds > 0 else None
+        )
         run_downloader(
             token=args.token,
             channel_id=args.channel_id,
@@ -401,10 +403,12 @@ def main():
             f"Downloader will auto-stop after {args.idle_seconds}s of inactivity "
             "(controlled by --idle-seconds)."
         )
-        idle = args.idle_seconds if args.idle_seconds and args.idle_seconds > 0 else None
+        idle = (
+            args.idle_seconds if args.idle_seconds and args.idle_seconds > 0 else None
+        )
         run_downloader(
-            token=None,               # DISCORD_BOT_TOKEN env
-            channel_id=None,          # MJ_CHANNEL_ID env
+            token=None,  # DISCORD_BOT_TOKEN env
+            channel_id=None,  # MJ_CHANNEL_ID env
             download_dir=args.download_dir,
             limit=None,
             idle_seconds=idle,

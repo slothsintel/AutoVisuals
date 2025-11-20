@@ -6,8 +6,8 @@ import requests
 
 def _get_project_root() -> Path:
     """AutoVisuals project root (AutoVisuals/)."""
-    here = Path(__file__).resolve().parent      # autovisuals/
-    return here.parent                          # AutoVisuals/
+    here = Path(__file__).resolve().parent  # autovisuals/
+    return here.parent  # AutoVisuals/
 
 
 def get_latest_prompt_file() -> Path:

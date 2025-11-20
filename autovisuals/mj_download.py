@@ -21,8 +21,8 @@ from PIL import Image
 
 
 def _get_project_root() -> Path:
-    here = Path(__file__).resolve().parent      # autovisuals/
-    return here.parent                          # AutoVisuals/
+    here = Path(__file__).resolve().parent  # autovisuals/
+    return here.parent  # AutoVisuals/
 
 
 PROJECT_ROOT = _get_project_root()
@@ -31,6 +31,7 @@ PROJECT_ROOT = _get_project_root()
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------
+
 
 def slug_from_content(content: str) -> str:
     """Fallback category slug from MJ prompt text."""
@@ -45,7 +46,7 @@ def slug_from_content(content: str) -> str:
         "imagine prompt",
     ]:
         if text.startswith(p):
-            text = text[len(p):].strip()
+            text = text[len(p) :].strip()
             break
 
     if "--" in text:
@@ -58,6 +59,7 @@ def slug_from_content(content: str) -> str:
     slug = "-".join(words[:2])
 
     import re as _re
+
     slug = _re.sub(r"[^a-z0-9\-]+", "", slug)
     return slug or "image"
 
@@ -132,6 +134,7 @@ def build_id_to_category_map(prompt_root: Path, date_str: str) -> Dict[str, str]
 # Discord client
 # ------------------------------------------------------------------
 
+
 class MJDownloader(discord.Client):
     def __init__(
         self,
@@ -173,9 +176,7 @@ class MJDownloader(discord.Client):
         """Close client after idle_seconds with no downloads."""
         assert self.idle_seconds is not None
         while not self.is_closed():
-            await discord.utils.sleep_until(
-                datetime.utcnow() + timedelta(seconds=3)
-            )
+            await discord.utils.sleep_until(datetime.utcnow() + timedelta(seconds=3))
             if self.last_download_time is None:
                 continue
             elapsed = (datetime.utcnow() - self.last_download_time).total_seconds()
@@ -257,6 +258,7 @@ class MJDownloader(discord.Client):
 # ------------------------------------------------------------------
 # Public runner (CLI passes all parameters)
 # ------------------------------------------------------------------
+
 
 def run_downloader(
     token: Optional[str],

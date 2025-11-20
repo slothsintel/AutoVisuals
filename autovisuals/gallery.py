@@ -69,7 +69,8 @@ def build_gallery(
             imgs = [
                 p
                 for p in sorted(cat_dir.iterdir())
-                if p.is_file() and p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
+                if p.is_file()
+                and p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
             ]
             if not imgs:
                 continue
@@ -210,7 +211,9 @@ p.meta {
                 next_path = files[idx + 1] if idx < len(files) - 1 else None
 
                 img_rel_from_zoom = os.path.relpath(img_path, start=zoom_page.parent)
-                gallery_rel_from_zoom = os.path.relpath(out_path, start=zoom_page.parent)
+                gallery_rel_from_zoom = os.path.relpath(
+                    out_path, start=zoom_page.parent
+                )
 
                 prev_rel = None
                 next_rel = None
@@ -381,25 +384,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     f"<img class='zoom-img' src='{escape(img_rel_from_zoom)}' "
                     f"alt='{escape(img_path.name)}' />"
                 )
-                zoom_html.append(
-                    f"<div class='filename'>{escape(img_path.name)}</div>"
-                )
+                zoom_html.append(f"<div class='filename'>{escape(img_path.name)}</div>")
                 zoom_html.append("</div>")
                 zoom_html.append("</body></html>")
 
                 zoom_page.write_text("\n".join(zoom_html), encoding="utf-8")
 
                 # In main gallery: thumbnail → zoom page
-                zoom_rel_from_gallery = os.path.relpath(zoom_page, start=out_path.parent)
+                zoom_rel_from_gallery = os.path.relpath(
+                    zoom_page, start=out_path.parent
+                )
                 img_rel_from_gallery = os.path.relpath(img_path, start=out_path.parent)
 
                 thumb_img = (
                     f"<img src='{escape(img_rel_from_gallery)}' "
                     f"alt='{escape(img_path.name)}' loading='lazy' />"
                 )
-                thumb_html = (
-                    f"<a href='{escape(zoom_rel_from_gallery)}' target='_blank'>{thumb_img}</a>"
-                )
+                thumb_html = f"<a href='{escape(zoom_rel_from_gallery)}' target='_blank'>{thumb_img}</a>"
 
                 parts.append("<div class='card'>")
                 parts.append(thumb_html)
