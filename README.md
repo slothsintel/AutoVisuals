@@ -13,151 +13,208 @@
 
 <div align="center">
 
-**A Sloths Intel project (by Sloths Visuals)......**
+**AutoVisuals** is a fully automated pipeline for generating **Midjourney-ready prompts**, sending them to **Discord**, automatically **downloading and splitting MJ images**, and building a beautiful **HTML gallery** with zoom navigation.
+
+Designed for **Sloths Visuals (SlothsIntel)**, this tool allows one-click production of consistent, stock-ready illustration batches for Adobe Stock or internal datasets.
 
 </div>
 
 ---
 
-# 📘 Overview
+# ⭐ Features
 
-**AutoVisuals** is a modular AI engine designed to automatically generate:
+### 🔮 Prompt & Metadata Generator
+- Generates **category**, **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
+- Supports multiple LLM providers:
+  - OpenAI GPT-5.1  
+  - Claude 3 Sonnet  
+  - Gemini 1.5  
+  - Llama 4 Maverick (free)  
+  - DeepSeek-V3 (free)
+- Auto-attaches `[av:id]` tags for later category mapping.
 
-- 🎨 High-quality creative themes 
-- 🏷 Adobe Stock style metadata
-- 📝 Midjourney-ready prompts   
-- 🔄 Batch generation workflows  
+### 🤖 Discord Automation
+- Sends each prompt line to any Discord channel via **webhook**.
+- Confirms each prompt in your private server with [one click]().
+- Downloads MJ bot images via **Discord bot token**.
+- Auto-splits 2×2 grids into 4 tiles.  
+- Auto-categorises images using `[av:id]`.
+
+### 🖼️ HTML Gallery Builder
+- Builds a polished responsive gallery:
+  - Date → Category → Images  
+- Zoom mode includes:
+  - **Prev/Next buttons**  
+  - **Mouse wheel navigation (up = prev, down = next)**  
+  - **Keyboard ← → arrows**  
+  - **Back to Gallery button**
+
+### 🚀 Full Pipeline Command
+```
+autovisuals pipeline
+```
+Runs:
+```
+generate → send → download → split → gallery
+```
+
+### 📊 Status Summary
+```
+autovisuals status
+```
+Shows how many prompts/images exist per date/category.
 
 ---
 
-# 📁 Project Structure
+# 🧩 Installation
 
-<div style="overflow-x: auto;">
-
-<pre>
-AutoVisuals/
-├─ autovisuals/
-│  ├─ __init__.py
-│  ├─ get_mj_prompt.py
-│  ├─ pipelines/
-│  │   └─ (future batch modules)
-│  └─ data/
-│      └─ adobe_cat.csv
-│
-├─ scripts/
-│  ├─ run_get_mj_prompt.py
-│  └─ run_batch_generation.py
-│
-├─ docs/
-│  ├─ logo_light.svg
-│  ├─ logo_dark.svg
-│  └─ index.html
-│
-├─ requirements.txt
-└─ README.md
-</pre>
-
-</div>
-
----
-
-# 🚀 Quick Start
-
-## Install dependencies
-first
+####  Clone the repository
+```bash
+git clone https://github.com/slothsintel/AutoVisuals
+cd AutoVisuals
 ```
-conda create -n visuals python>=3.14
-```
-then
-```
-pip install openai anthropic google-generativeai
-```
-or
-```
+
+### Install environment
+```bash
 pip install -r requirements.txt
 ```
-## Export API key if you use paid chatbot
-in your `.bashrc`, add
-```
-export API_KEY="your-api-key"
-```
-## Export $HOME and $PATH
-```
-export PATH="$HOME/AutoVisuals/scripts:$PATH"
-```
-do not forget to source your `.bashrc`
-```
+
+### Add to PATH (WSL recommended)
+```bash
+echo 'export PATH="$PATH:/mnt/c/Users/xilu/OneDrive/bus/slothsintel/slothsvisuals/AutoVisuals/scripts"' >> ~/.bashrc
 source ~/.bashrc
 ```
-## Usage
-### Basic command
+
+---
+
+# 🔐 Required Environment Variables
+
+### For prompt generation:
 ```
-autovisuals generate [options]
+export API_KEY="your LLM API key"
 ```
 
-### Providers
+### For Discord prompt sending:
 ```
--p openai
--p anthropic
--p gemini
--p llama
--p deepseek
+export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
-### Theme mode
+### For Discord image downloading:
 ```
--m r          # random theme (weighted)
--m m          # manual theme (you will be prompted)
-```
-
-### Title mode
-```
--t r          # random title
--t m          # manual title (only valid when -m m)
+export DISCORD_BOT_TOKEN="your-bot-token"
+export MJ_CHANNEL_ID="123456789012345678"
 ```
 
-### Records count
+---
+
+# 🧠 Usage
+
+---
+
+## 1️⃣ Generate prompts & metadata
+
 ```
--d 5          # generate 5 records
+autovisuals generate -d 3 -p openai
 ```
 
-### Repeats value
+Outputs:
+
 ```
--r 5          # style repeat value
+prompt/YYYY-MM-DD/category/
+   ├── meta.json
+   ├── meta.csv
+   └── prompt.txt
 ```
 
-### Theme list CSV
+---
+
+## 2️⃣ Send prompts to Discord
+
 ```
--l adobe_cat.csv
--l custom_list.csv
-```
-### Output folder
-```
--o prompt
--o results
+autovisuals discord --all-categories
 ```
 
-## Quick examples
-### Using gemini to create 5 records
+or send latest category:
+
 ```
-autovisuals generate -p gemini -m r -t r -d 5
-```
-### Manual theme + manual title
-```
-autovisuals generate -m m -t m
-```
-### Use a custom theme list
-```
-autovisuals generate -l my_themes.csv
-```
-### Save to custom output directory
-```
-autovisuals generate -o results
+autovisuals discord
 ```
 
-## Help
+---
+
+## 3️⃣ Download Midjourney images
+
 ```
-autovisuals generate --help
+autovisuals download
+```
+
+The downloader:
+- Watches your MJ channel  
+- Automatically fetches new images  
+- Splits 2×2 → 4 images  
+- Categorises using `[av:id]`  
+
+Idle timeout default: **180 seconds**
+
+---
+
+## 4️⃣ Generate HTML gallery
+
+```
+autovisuals gallery
+```
+
+Outputs:
+
+```
+mj_gallery.html
+mj_zoom/date/category/image.html
+```
+
+With:
+- Clickable thumbnails  
+- Zoom view  
+- Keyboard ← →  
+- Mouse wheel navigation  
+- Smooth UX  
+
+---
+
+## 5️⃣ Full Pipeline
+
+```
+autovisuals pipeline
+```
+
+Runs everything:
+
+```
+(1) generate  
+(2) send to discord  
+(3) download & split  
+(4) build gallery  
+```
+
+Zero manual file work.
+
+---
+
+# 📊 Status Command
+
+Fast overview of prompts & images:
+
+```
+autovisuals status
+```
+
+Example:
+
+```
+DATE         CATEGORY             PROMPTS   IMAGES
+2025-11-21   business                  3        12
+2025-11-21   nature                    3        12
+---------------------------------------------------
+TOTAL                                6        24
 ```
 
 ---
@@ -192,41 +249,8 @@ sunset over mountains,5
 
 ---
 
-# 🖥 Example Output
-
-## Midjourney Prompt
-```
-/imagine prompt futuristic cyber sloth sipping coffee in neon‑lit alley --ar 16:9 --s 20 --c 10 --raw --r 5
-```
-
-## Metadata JSON
-```json
-{
-  "category": "nature",
-  "theme": "forest in fog",
-  "prompt": "futuristic forest scene...",
-  "title": "Mysterious Forest Fog",
-  "description": "A soft atmospheric forest scene.",
-  "keywords": ["forest", "...", "generative ai"]
-}
-```
----
-
-#  WSL/Linux/MacOS setup
-
-```
-cd ~/projects/AutoVisuals
-pip install -r requirements.txt
-echo 'export API_KEY="your_api_key"' >> ~/.bashrc
-echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH""' >> ~/.bashrc
-source ~/.bashrc
-```
-
----
-
 # 🏗 Future Modules
- 
-- Midjourney/Discord API integration  
+   
 - Illustration Scaling  
 - GUI (AutoVisuals Studio)  
 
