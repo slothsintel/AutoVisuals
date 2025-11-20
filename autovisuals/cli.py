@@ -1,12 +1,16 @@
 """
-Command-line interface for AutoVisuals.
+AutoVisuals CLI front-end.
 
-Examples:
-    autovisuals generate -p openai -l adobe_cat.csv -m r -t r -d 5 -r 5 -o prompt
+Commands:
+    autovisuals generate
     autovisuals discord
-    autovisuals download --limit 5
-    autovisuals pipeline -p openai -d 5 --limit 5
+    autovisuals download
     autovisuals gallery
+    autovisuals pipeline
+    autovisuals status
+
+All defaults (providers, paths, idle timeout, etc.) are defined HERE so
+the helper modules stay simple.
 """
 
 import os
@@ -14,229 +18,280 @@ import argparse
 from pathlib import Path
 
 from .get_mj_prompt import main as generate_main
+from .send_to_discord import (
+    _get_project_root,
+    get_latest_prompt_file,
+    send_prompt_file,
+    send_to_discord as send_single_prompt,
+)
+from .mj_download import run_downloader
+from .gallery import build_gallery
 
+
+PROJECT_ROOT = _get_project_root()
+
+DEFAULT_THEME_CSV = "adobe_cat.csv"
+DEFAULT_OUT_PROMPT = "prompt"
+DEFAULT_DOWNLOAD_DIR = "mj_downloads"
+DEFAULT_GALLERY_HTML = "mj_gallery.html"
+DEFAULT_IDLE_SECONDS = 180  # 3 minutes default idle timeout
+
+
+# ------------------------------------------------------------------
+# Helpers for prompt paths
+# ------------------------------------------------------------------
+
+def get_prompt_root() -> Path:
+    return PROJECT_ROOT / DEFAULT_OUT_PROMPT
+
+
+def get_latest_date() -> str:
+    root = get_prompt_root()
+    if not root.exists():
+        raise FileNotFoundError("No prompt directory found.")
+    dates = sorted(p.name for p in root.iterdir() if p.is_dir())
+    if not dates:
+        raise FileNotFoundError("No date folders under prompt/.")
+    return dates[-1]
+
+
+def get_categories_for_date(date: str) -> list[str]:
+    date_dir = get_prompt_root() / date
+    if not date_dir.exists():
+        return []
+    return sorted(p.name for p in date_dir.iterdir() if p.is_dir())
+
+
+def get_prompt_file_for(date: str, category_slug: str) -> Path:
+    path = get_prompt_root() / date / category_slug / "prompt.txt"
+    if not path.exists():
+        raise FileNotFoundError(f"No prompt.txt for {date}/{category_slug}")
+    return path
+
+
+# ------------------------------------------------------------------
+# Parser
+# ------------------------------------------------------------------
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="autovisuals",
-        description="AutoVisuals CLI - automated prompt + metadata + Discord tools",
+        description="AutoVisuals – automatic prompt & gallery pipeline.",
     )
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command")
 
-    # --- generate subcommand ---
-    gen = subparsers.add_parser(
-        "generate",
-        help="Generate prompts + metadata from a theme list",
+    # generate
+    gen = subparsers.add_parser("generate", help="Generate prompts + metadata.")
+    gen.add_argument("-p", "--provider", default="openai")
+    gen.add_argument("-l", "--list", default=DEFAULT_THEME_CSV)
+    gen.add_argument("-m", "--mode", default="r")
+    gen.add_argument("-t", "--title", default="r")
+    gen.add_argument("-d", "--records", type=int, default=3)
+    gen.add_argument("-r", "--repeat", type=int, default=5)
+    gen.add_argument("-o", "--out", default=DEFAULT_OUT_PROMPT)
+
+    # discord
+    dis = subparsers.add_parser("discord", help="Send prompts to Discord webhook.")
+    dis.add_argument("-w", "--webhook", help="Webhook URL (or WEBHOOK_URL env).")
+    dis.add_argument("--category", help="Specific category slug to send.")
+    dis.add_argument(
+        "--all-categories",
+        action="store_true",
+        help="Send prompts for all categories for latest date.",
     )
 
-    gen.add_argument(
-        "-p",
-        "--provider",
-        choices=["openai", "anthropic", "gemini", "llama", "deepseek"],
-        default="openai",
-        help="LLM provider to use (default: openai)",
+    # download
+    dl = subparsers.add_parser("download", help="Download Midjourney images.")
+    dl.add_argument("-t", "--token", help="Discord bot token (or DISCORD_BOT_TOKEN).")
+    dl.add_argument(
+        "-c", "--channel-id", type=int, help="Discord channel id (or MJ_CHANNEL_ID)."
     )
-    gen.add_argument(
-        "-l",
-        "--list",
-        default="adobe_cat.csv",
-        help="Theme list CSV (theme,weight). Relative paths resolved under autovisuals/data/",
-    )
-    gen.add_argument(
-        "-m",
-        "--mode",
-        choices=["r", "m", "random", "manual"],
-        default="r",
-        help="Theme mode",
-    )
-    gen.add_argument(
-        "-t",
-        "--title",
-        choices=["r", "m", "random", "manual"],
-        default="r",
-        help="Title mode",
-    )
-    gen.add_argument(
-        "-d",
-        "--records",
-        type=int,
-        default=3,
-        help="How many records to generate (default 3)",
-    )
-    gen.add_argument(
-        "-r",
-        "--repeat",
-        type=int,
-        default=5,
-        help="Midjourney --r repeat parameter",
-    )
-    gen.add_argument(
+    dl.add_argument(
         "-o",
         "--out",
-        default="prompt",
-        help="Output root folder (default: prompt/)",
+        default=DEFAULT_DOWNLOAD_DIR,
+        help="Download root folder.",
     )
-
-    # --- discord subcommand ---
-    discord_cmd = subparsers.add_parser(
-        "discord",
-        help="Send prompts to Discord webhook. Defaults to latest folder + WEBHOOK_URL.",
-    )
-
-    discord_cmd.add_argument(
-        "-f",
-        "--file",
-        default=None,
-        help="Path to prompt.txt. If omitted, uses latest timestamp folder.",
-    )
-    discord_cmd.add_argument(
-        "-w",
-        "--webhook",
-        default=None,
-        help="Discord webhook URL. If omitted, reads WEBHOOK_URL env var.",
-    )
-
-    # --- download subcommand ---
-    download_cmd = subparsers.add_parser(
-        "download",
-        help="Download Midjourney images from your private Discord server channel.",
-    )
-
-    download_cmd.add_argument(
-        "--token",
-        default=None,
-        help="Discord Bot Token. If omitted, uses DISCORD_BOT_TOKEN env var.",
-    )
-    download_cmd.add_argument(
-        "--channel-id",
-        type=int,
-        default=None,
-        help="Discord channel ID. If omitted, uses MJ_CHANNEL_ID env var.",
-    )
-    download_cmd.add_argument(
-        "--out",
-        default="mj_downloads",
-        help="Folder to save downloaded images (default: mj_downloads/)",
-    )
-    download_cmd.add_argument(
+    dl.add_argument(
         "--limit",
         type=int,
         default=None,
-        help="Stop after downloading N images. Default: run until Ctrl+C",
+        help="Stop after N images (default: no limit).",
     )
-
-    # --- pipeline subcommand ---
-    pipeline_cmd = subparsers.add_parser(
-        "pipeline",
-        help="Generate → send prompts to Discord → start MJ downloader in one go.",
-    )
-
-    # generation options (same as generate)
-    pipeline_cmd.add_argument(
-        "-p",
-        "--provider",
-        choices=["openai", "anthropic", "gemini", "llama", "deepseek"],
-        default="openai",
-        help="LLM provider to use (default: openai)",
-    )
-    pipeline_cmd.add_argument(
-        "-l",
-        "--list",
-        default="adobe_cat.csv",
-        help="Theme list CSV (theme,weight). Relative paths resolved under autovisuals/data/",
-    )
-    pipeline_cmd.add_argument(
-        "-m",
-        "--mode",
-        choices=["r", "m", "random", "manual"],
-        default="r",
-        help="Theme mode",
-    )
-    pipeline_cmd.add_argument(
-        "-t",
-        "--title",
-        choices=["r", "m", "random", "manual"],
-        default="r",
-        help="Title mode",
-    )
-    pipeline_cmd.add_argument(
-        "-d",
-        "--records",
+    dl.add_argument(
+        "--idle-seconds",
         type=int,
-        default=3,
-        help="How many records to generate (default 3)",
-    )
-    pipeline_cmd.add_argument(
-        "-r",
-        "--repeat",
-        type=int,
-        default=5,
-        help="Midjourney --r repeat parameter",
-    )
-    pipeline_cmd.add_argument(
-        "-o",
-        "--out",
-        default="prompt",
-        help="Output root folder (default: prompt/)",
+        default=DEFAULT_IDLE_SECONDS,
+        help=f"Auto-stop after this many seconds of inactivity (default: {DEFAULT_IDLE_SECONDS}). "
+             "Use 0 to disable.",
     )
 
-    # Discord webhook to send prompts
-    pipeline_cmd.add_argument(
-        "--webhook",
-        default=None,
-        help="Discord webhook URL for sending prompts. If omitted, uses WEBHOOK_URL env var.",
-    )
-
-    # Downloader options
-    pipeline_cmd.add_argument(
-        "--token",
-        default=None,
-        help="Discord Bot Token for downloader. If omitted, uses DISCORD_BOT_TOKEN env var.",
-    )
-    pipeline_cmd.add_argument(
-        "--channel-id",
-        type=int,
-        default=None,
-        help="Discord channel ID for MJ output. If omitted, uses MJ_CHANNEL_ID env var.",
-    )
-    pipeline_cmd.add_argument(
-        "--download-out",
-        default="mj_downloads",
-        help="Root folder for downloaded images (default: mj_downloads/).",
-    )
-    pipeline_cmd.add_argument(
-        "--limit",
-        type=int,
-        default=None,
-        help="Stop downloader after N images (default: no limit).",
-    )
-
-    # --- gallery subcommand ---
-    gallery_cmd = subparsers.add_parser(
-        "gallery",
-        help="Build a static HTML gallery from downloaded images.",
-    )
-
-    gallery_cmd.add_argument(
+    # gallery
+    gal = subparsers.add_parser("gallery", help="Build HTML gallery.")
+    gal.add_argument(
         "--download-dir",
-        default="mj_downloads",
-        help="Root folder of downloaded images (default: mj_downloads/).",
+        default=DEFAULT_DOWNLOAD_DIR,
+        help="MJ image root.",
     )
-    gallery_cmd.add_argument(
+    gal.add_argument(
+        "--prompt-dir",
+        default=DEFAULT_OUT_PROMPT,
+        help="Prompt root.",
+    )
+    gal.add_argument(
         "--out",
-        default="mj_gallery.html",
-        help="Path to output HTML file (default: mj_gallery.html).",
+        default=DEFAULT_GALLERY_HTML,
+        help="Gallery HTML output file.",
+    )
+
+    # pipeline
+    pipe = subparsers.add_parser(
+        "pipeline",
+        help="Full pipeline: generate → send → download → gallery.",
+    )
+
+    # generation
+    pipe.add_argument("-p", "--provider", default="openai")
+    pipe.add_argument("-l", "--list", default=DEFAULT_THEME_CSV)
+    pipe.add_argument("-m", "--mode", default="r")
+    pipe.add_argument("-t", "--title", default="r")
+    pipe.add_argument("-d", "--records", type=int, default=3)
+    pipe.add_argument("-r", "--repeat", type=int, default=5)
+    pipe.add_argument(
+        "-o",
+        "--out",
+        default=DEFAULT_OUT_PROMPT,
+        help="Prompt output root (used also as prompt_dir for gallery).",
+    )
+
+    # discord
+    pipe.add_argument("-w", "--webhook", help="Webhook URL (or WEBHOOK_URL env).")
+
+    # download + gallery
+    pipe.add_argument(
+        "--download-dir",
+        default=DEFAULT_DOWNLOAD_DIR,
+        help="Download directory for images.",
+    )
+    pipe.add_argument(
+        "--gallery-out",
+        default=DEFAULT_GALLERY_HTML,
+        help="Output gallery HTML file.",
+    )
+    pipe.add_argument(
+        "--idle-seconds",
+        type=int,
+        default=DEFAULT_IDLE_SECONDS,
+        help=f"Downloader idle timeout in seconds (default: {DEFAULT_IDLE_SECONDS}).",
+    )
+
+    # status
+    status = subparsers.add_parser(
+        "status",
+        help="Show a tiny summary of prompts + images per date/category.",
+    )
+    status.add_argument(
+        "--prompt-dir",
+        default=DEFAULT_OUT_PROMPT,
+        help="Root folder for prompt data (default: prompt).",
+    )
+    status.add_argument(
+        "--download-dir",
+        default=DEFAULT_DOWNLOAD_DIR,
+        help="Root folder for downloaded images (default: mj_downloads).",
+    )
+    status.add_argument(
+        "--date",
+        help="Only show this YYYY-MM-DD date (default: all dates found under prompt/).",
     )
 
     return parser
 
 
-def main(argv=None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(argv)
+# ------------------------------------------------------------------
+# Status helper
+# ------------------------------------------------------------------
 
-    # generate
+def run_status(prompt_dir: str, download_dir: str, only_date: str | None):
+    prompt_root = PROJECT_ROOT / prompt_dir
+    download_root = PROJECT_ROOT / download_dir
+
+    if not prompt_root.exists():
+        print(f"prompt root not found: {prompt_root}")
+        return
+
+    dates = sorted(p.name for p in prompt_root.iterdir() if p.is_dir())
+    if not dates:
+        print(f"no date folders under {prompt_root}")
+        return
+
+    if only_date:
+        if only_date not in dates:
+            print(f"date {only_date!r} not found under {prompt_root}")
+            return
+        dates = [only_date]
+
+    print(f"Project root  : {PROJECT_ROOT}")
+    print(f"Prompt root   : {prompt_root}")
+    print(f"Download root : {download_root}")
+    print()
+
+    header = f"{'DATE':<12} {'CATEGORY':<20} {'PROMPTS':>8} {'IMAGES':>8}"
+    print(header)
+    print("-" * len(header))
+
+    total_prompts = 0
+    total_images = 0
+
+    img_exts = {".png", ".jpg", ".jpeg", ".webp"}
+
+    for date in dates:
+        date_dir = prompt_root / date
+        cats = sorted(p.name for p in date_dir.iterdir() if p.is_dir())
+        if not cats:
+            continue
+
+        for cat in cats:
+            cat_dir = date_dir / cat
+            prompt_file = cat_dir / "prompt.txt"
+
+            # count prompts by non-empty lines
+            prompts_count = 0
+            if prompt_file.exists():
+                for line in prompt_file.read_text(encoding="utf-8").splitlines():
+                    if line.strip():
+                        prompts_count += 1
+
+            # count image files in download tree
+            images_count = 0
+            img_dir = download_root / date / cat
+            if img_dir.exists():
+                for f in img_dir.iterdir():
+                    if f.is_file() and f.suffix.lower() in img_exts:
+                        images_count += 1
+
+            total_prompts += prompts_count
+            total_images += images_count
+
+            print(
+                f"{date:<12} {cat:<20.20} {prompts_count:>8} {images_count:>8}"
+            )
+
+    print("-" * len(header))
+    print(
+        f"{'TOTAL':<12} {'':<20} {total_prompts:>8} {total_images:>8}"
+    )
+
+
+# ------------------------------------------------------------------
+# Main dispatch
+# ------------------------------------------------------------------
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+
     if args.command == "generate":
         generate_main(
             provider=args.provider,
@@ -248,42 +303,58 @@ def main(argv=None) -> None:
             out_arg=args.out,
         )
 
-    # discord
     elif args.command == "discord":
-        from .send_to_discord import send_prompt_file, get_latest_prompt_file
-
-        if args.file:
-            prompt_path = Path(args.file)
-        else:
-            prompt_path = get_latest_prompt_file()
-            print(f"Using latest prompt file: {prompt_path}")
-
         webhook = args.webhook or os.environ.get("WEBHOOK_URL")
         if not webhook:
-            raise ValueError(
-                "No webhook provided. Use -w or set WEBHOOK_URL env variable."
-            )
+            raise ValueError("Provide --webhook or set WEBHOOK_URL env variable.")
 
-        send_prompt_file(prompt_path, webhook)
+        latest_date = get_latest_date()
+        cats = get_categories_for_date(latest_date)
 
-    # download
+        print(f"Latest date: {latest_date}")
+        print(f"Available categories: {cats}")
+
+        if args.all_categories:
+            print("Sending ALL categories...")
+            for cat in cats:
+                pf = get_prompt_file_for(latest_date, cat)
+                print(f"→ {cat}")
+                send_prompt_file(pf, webhook)
+            return
+
+        if args.category:
+            if args.category not in cats:
+                raise ValueError(f"Category {args.category!r} not found.")
+            pf = get_prompt_file_for(latest_date, args.category)
+            print(f"→ {args.category}")
+            send_prompt_file(pf, webhook)
+            return
+
+        print("No category specified, sending latest category (fallback).")
+        pf = get_latest_prompt_file()
+        send_prompt_file(pf, webhook)
+
     elif args.command == "download":
-        from .mj_download import run_downloader
-
+        idle = args.idle_seconds if args.idle_seconds and args.idle_seconds > 0 else None
         run_downloader(
             token=args.token,
             channel_id=args.channel_id,
             download_dir=args.out,
             limit=args.limit,
+            idle_seconds=idle,
         )
 
-    # pipeline: generate → send → download
-    elif args.command == "pipeline":
-        from .send_to_discord import send_prompt_file, get_latest_prompt_file
-        from .mj_download import run_downloader
+    elif args.command == "gallery":
+        out = build_gallery(
+            download_root=args.download_dir,
+            prompt_root=args.prompt_dir,
+            out_file=args.out,
+        )
+        print(f"Gallery written to: {out}")
 
-        # 1) Generate prompts + metadata
-        print("[pipeline] Step 1/3: generate")
+    elif args.command == "pipeline":
+        # 1. generate
+        print("Step 1/4: Generating prompts + metadata...")
         generate_main(
             provider=args.provider,
             list_arg=args.list,
@@ -294,38 +365,69 @@ def main(argv=None) -> None:
             out_arg=args.out,
         )
 
-        # 2) Send latest prompts to Discord webhook
-        print("[pipeline] Step 2/3: send prompts to Discord")
-        prompt_path = get_latest_prompt_file()
-        print(f"[pipeline] Using latest prompt file: {prompt_path}")
-
+        # 2. send to discord
+        print("\nStep 2/4: Sending prompts to Discord...")
         webhook = args.webhook or os.environ.get("WEBHOOK_URL")
         if not webhook:
-            raise ValueError(
-                "No webhook provided. Use --webhook or set WEBHOOK_URL env variable."
-            )
+            raise ValueError("Provide --webhook or set WEBHOOK_URL for pipeline.")
 
-        send_prompt_file(prompt_path, webhook)
+        latest_date = get_latest_date()
+        cats = get_categories_for_date(latest_date)
+        if not cats:
+            raise RuntimeError(f"No categories found under prompt/{latest_date}/")
 
-        # 3) Start downloader (blocking)
-        print("[pipeline] Step 3/3: start MJ downloader")
-        print("[pipeline] Now trigger Midjourney in your Discord channel.")
+        print(f"Using date: {latest_date}")
+        print(f"Categories: {cats}")
+
+        total_prompts = 0
+        for cat in cats:
+            pf = get_prompt_file_for(latest_date, cat)
+            print(f"→ sending {cat}")
+            for line in pf.read_text(encoding="utf-8").splitlines():
+                msg = line.strip()
+                if not msg:
+                    continue
+                send_single_prompt(msg, webhook)
+                total_prompts += 1
+
+        print(f"Total prompts sent: {total_prompts}")
+        if total_prompts == 0:
+            print("No prompts, aborting pipeline after step 2.")
+            return
+
+        # 3. download
+        print("\nStep 3/4: Downloading images from Discord...")
+        print(
+            f"Downloader will auto-stop after {args.idle_seconds}s of inactivity "
+            "(controlled by --idle-seconds)."
+        )
+        idle = args.idle_seconds if args.idle_seconds and args.idle_seconds > 0 else None
         run_downloader(
-            token=args.token,
-            channel_id=args.channel_id,
-            download_dir=args.download_out,
-            limit=args.limit,
+            token=None,               # DISCORD_BOT_TOKEN env
+            channel_id=None,          # MJ_CHANNEL_ID env
+            download_dir=args.download_dir,
+            limit=None,
+            idle_seconds=idle,
         )
 
-    # gallery
-    elif args.command == "gallery":
-        from .gallery import build_gallery
+        # 4. gallery
+        print("\nStep 4/4: Building gallery...")
+        gallery_path = build_gallery(
+            download_root=args.download_dir,
+            prompt_root=args.out,
+            out_file=args.gallery_out,
+        )
+        print(f"Pipeline complete. Gallery written to: {gallery_path}")
 
-        out = build_gallery(download_root=args.download_dir, out_file=args.out)
-        print(f"Gallery written to: {out}")
+    elif args.command == "status":
+        run_status(
+            prompt_dir=args.prompt_dir,
+            download_dir=args.download_dir,
+            only_date=args.date,
+        )
 
     else:
-        parser.error(f"Unknown command: {args.command!r}")
+        parser.print_help()
 
 
 if __name__ == "__main__":

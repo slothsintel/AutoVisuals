@@ -2,30 +2,33 @@
 """
 autovisuals.get_mj_prompt
 
-Part of the AutoVisuals project.
+Core generator: given a theme list, generate Adobe-style metadata +
+Midjourney prompts.
 
-Script to:
-- load THEMES + WEIGHTS from a csv (theme list)
-- generate adobe-stock-style metadata + midjourney prompts
-- support providers: openai / anthropic / gemini / llama / deepseek
-- use one env var: API_KEY
-- flags:
-    -p provider       (openai / anthropic / gemini / llama / deepseek)
-    -l list           (theme list csv, theme,weight)
-    -m mode           (random/manual theme)
-    -t title          (random/manual title; manual only used in manual theme mode)
-    -d records        (number of records)
-    -r repeat         (midjourney --r value)
-    -o out            (output root folder; default: prompt/)
+This file exposes:
+
+    main(provider, list_arg, mode, title_mode, n, repeat, out_arg)
+
+CLI defaults live in autovisuals.cli (for the `autovisuals` entrypoint).
+You can still run this module directly:
+
+    python -m autovisuals.get_mj_prompt  ...
+
+but the recommended way is via:
+
+    autovisuals generate ...
 """
 
 import os
 import json
 import random
 import csv
+import re
+import uuid
 from pathlib import Path
 import argparse
 from datetime import datetime
+from collections import defaultdict
 
 from openai import OpenAI
 from anthropic import Anthropic
@@ -33,9 +36,12 @@ import google.generativeai as genai
 import requests
 
 
-# ==========================================================
-# 1. configuration
-# ==========================================================
+# ------------------------------------------------------------------
+# Project / paths
+# ------------------------------------------------------------------
+
+BASE_DIR = Path(__file__).resolve().parent          # autovisuals/
+PROJECT_ROOT = BASE_DIR.parent                      # AutoVisuals/
 
 DEFAULT_PROVIDER = "openai"
 DEFAULT_MODEL_OPENAI = "gpt-5.1"
@@ -44,15 +50,10 @@ DEFAULT_MODEL_GEMINI = "gemini-1.5-flash"
 DEFAULT_MODEL_LLAMA = "llama-4-maverick"
 DEFAULT_MODEL_DEEPSEEK = "deepseek-v3"
 
-
 DEFAULT_NUM_ITEMS = 3
 DEFAULT_REPEAT = 5
-DEFAULT_LIST_FILE = "adobe_cat.csv"  # under ./data/ by default (theme,weight)
+DEFAULT_LIST_FILE = "adobe_cat.csv"                 # inside autovisuals/data
 DEFAULT_OUT_DIR = "prompt"
-
-TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-# BASE_DIR is the autovisuals/ package directory when this file is placed at autovisuals/get_mj_prompt.py
-BASE_DIR = Path(__file__).resolve().parent
 
 API_KEY = os.getenv("API_KEY")
 if not API_KEY:
@@ -69,9 +70,10 @@ claude_client = None
 gemini_client = None
 
 
-# ==========================================================
-# 2. theme reader (theme, weight)
-# ==========================================================
+# ------------------------------------------------------------------
+# Theme loader
+# ------------------------------------------------------------------
+
 def load_themes_with_weights(csv_path: Path):
     """
     CSV format:
@@ -87,7 +89,6 @@ def load_themes_with_weights(csv_path: Path):
             if not row:
                 continue
 
-            # handle single-cell like "theme,5"
             if len(row) == 1 and "," in row[0]:
                 row = [p.strip() for p in row[0].split(",", 1)]
 
@@ -100,8 +101,8 @@ def load_themes_with_weights(csv_path: Path):
             try:
                 w = float(weight_raw)
             except ValueError:
-                # treat row 1 as header if weight is not numeric
                 if row_num == 1:
+                    # header
                     continue
                 raise ValueError(f"invalid weight '{weight_raw}' in row {row_num}")
 
@@ -117,9 +118,80 @@ def load_themes_with_weights(csv_path: Path):
     return themes, weights
 
 
-# ==========================================================
-# 3. system prompt
-# ==========================================================
+# ------------------------------------------------------------------
+# MJ helpers
+# ------------------------------------------------------------------
+
+def normalize_mj_prefix(prompt: str) -> str:
+    """
+    Ensure the prompt begins with exactly '/imagine prompt:' (no trailing space).
+    Accepts content with or without prefix.
+    """
+    s = prompt.strip()
+    low = s.lower()
+
+    if low.startswith("/imagine prompt:"):
+        rest = s[len("/imagine prompt:"):].lstrip()
+        return f"/imagine prompt:{rest}"
+
+    if low.startswith("/imagine prompt"):
+        rest = s[len("/imagine prompt"):].lstrip(": ").lstrip()
+        return f"/imagine prompt:{rest}"
+
+    if low.startswith("imagine prompt:"):
+        rest = s[len("imagine prompt:"):].lstrip()
+        return f"/imagine prompt:{rest}"
+
+    if low.startswith("imagine prompt"):
+        rest = s[len("imagine prompt"):].lstrip(": ").lstrip()
+        return f"/imagine prompt:{rest}"
+
+    return f"/imagine prompt:{s}"
+
+
+def slug_from_text(text: str) -> str:
+    """
+    Slugify category names (used as folder names).
+    """
+    if not text:
+        return "category"
+
+    t = text.strip().lower()
+    words = t.split()
+    if not words:
+        return "category"
+
+    short = "-".join(words[:4])
+    slug = re.sub(r"[^a-z0-9\-]+", "", short)
+    return slug or "category"
+
+
+def attach_id_tag(full_prompt: str, uid: str) -> str:
+    """
+    Insert ID tag [av:uid] before MJ parameter block.
+    """
+    tag = f" [av:{uid}]"
+    s = full_prompt.rstrip()
+
+    if "--" in s:
+        base, rest = s.split("--", 1)
+        return base.rstrip() + tag + " --" + rest.lstrip()
+    else:
+        return s + tag
+
+
+def generate_id(existing_ids: set[str]) -> str:
+    while True:
+        uid = uuid.uuid4().hex[:4]
+        if uid not in existing_ids:
+            existing_ids.add(uid)
+            return uid
+
+
+# ------------------------------------------------------------------
+# System prompt
+# ------------------------------------------------------------------
+
 def make_system_prompt(repeat: int) -> str:
     return f"""
 you generate metadata and midjourney prompt content.
@@ -129,7 +201,7 @@ you must return valid json:
 {{
   "category": "string",
   "theme": "string",
-  "prompt": "string",             # do NOT include '/imagine prompt:' prefix — we add it automatically
+  "prompt": "string",             # do NOT include '/imagine prompt:' prefix — we add it
   "title": "string",
   "description": "string",
   "keywords": [...]
@@ -158,18 +230,18 @@ return only the json object, nothing else.
 """
 
 
-# ==========================================================
-# 4. multi-provider model caller
-# ==========================================================
+# ------------------------------------------------------------------
+# Multi-provider call
+# ------------------------------------------------------------------
+
 def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
     """
-    call the chosen provider (openai / anthropic / gemini)
-    and return a normalized metadata dict.
+    Call the chosen provider and return parsed JSON dict.
+    All provider-specific URLs / models can be tuned in cli.py via args.
     """
-
     provider = provider.lower()
 
-    # ---------- openai (gpt-5.1) ----------
+    # OpenAI
     if provider == "openai":
         global openai_client
         if openai_client is None:
@@ -191,7 +263,7 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
                         chunks.append(c.text)
         raw = "\n".join(chunks).strip()
 
-    # ---------- anthropic (claude 3) ----------
+    # Claude
     elif provider == "anthropic":
         global claude_client
         if claude_client is None:
@@ -205,7 +277,7 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
         )
         raw = msg.content[0].text
 
-    # ---------- gemini 1.5 ----------
+    # Gemini
     elif provider == "gemini":
         global gemini_client
         if gemini_client is None:
@@ -215,9 +287,8 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
         result = gemini_client.generate_content(system_prompt + "\n" + user_prompt)
         raw = result.text
 
-    # ---------- llama 4 maverick ----------
+    # Llama (example endpoint)
     elif provider == "llama":
-        # Free Llama 4 Maverick endpoint
         payload = {
             "model": DEFAULT_MODEL_LLAMA,
             "messages": [
@@ -225,16 +296,15 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
                 {"role": "user", "content": user_prompt},
             ],
         }
-
         resp = requests.post(
-            "https://api.llama-api.com/chat/completions", json=payload, timeout=60
+            "https://api.llama-api.com/chat/completions",
+            json=payload,
+            timeout=60,
         ).json()
-
         raw = resp["choices"][0]["message"]["content"]
 
-    # ---------- deepseek v3 ----------
+    # DeepSeek (example endpoint)
     elif provider == "deepseek":
-        # Free Deepseek v3 endpoint
         payload = {
             "model": DEFAULT_MODEL_DEEPSEEK,
             "messages": [
@@ -242,24 +312,23 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
                 {"role": "user", "content": user_prompt},
             ],
         }
-
         resp = requests.post(
-            "https://api.deepseek.ai/v1/chat/completions", json=payload, timeout=60
+            "https://api.deepseek.ai/v1/chat/completions",
+            json=payload,
+            timeout=60,
         ).json()
-
         raw = resp["choices"][0]["message"]["content"]
 
     else:
         raise ValueError(f"unknown provider: {provider}")
 
-    # parse json
     try:
         data = json.loads(raw)
     except Exception:
-        print("\nmodel raw output (not valid json):\n", raw)
+        print("\nmodel raw output:\n", raw)
         raise RuntimeError("model did not return valid json")
 
-    # normalize keywords to exactly 45, last = "generative ai"
+    # normalise keywords to exactly 45 with last = "generative ai"
     kw = data.get("keywords", [])
     if not isinstance(kw, list):
         raise ValueError("keywords must be a list")
@@ -290,13 +359,11 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
     return data
 
 
-# ==========================================================
-# 5. wrappers: random/manual theme
-# ==========================================================
+# ------------------------------------------------------------------
+# Core generation
+# ------------------------------------------------------------------
+
 def generate_for_theme(provider: str, theme: str, repeat: int) -> dict:
-    """
-    common generator for both random and manual theme modes.
-    """
     system_prompt = make_system_prompt(repeat)
     user_prompt = f"""
 theme: "{theme}"
@@ -311,11 +378,6 @@ return only the json object.
 """
     data = call_model(provider, system_prompt, user_prompt)
 
-    # normalize prompt to have correct /imagine prompt: prefix
-    if "prompt" in data and isinstance(data["prompt"], str):
-        data["prompt"] = normalize_mj_prefix(data["prompt"])
-
-    # ensure the 'theme' field exists and is at least the given theme if model forgot
     if (
         "theme" not in data
         or not isinstance(data["theme"], str)
@@ -326,22 +388,24 @@ return only the json object.
     return data
 
 
-# ==========================================================
-# 6. writers
-# ==========================================================
+# ------------------------------------------------------------------
+# Save helpers
+# ------------------------------------------------------------------
+
 def save_json(items, path: Path):
     path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
     print("saved json:", path)
 
 
 def save_csv(items, path: Path):
-    fields = ["category", "theme", "prompt", "title", "description", "keywords"]
+    fields = ["id", "category", "theme", "prompt", "title", "description", "keywords"]
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fields)
         w.writeheader()
         for it in items:
             w.writerow(
                 {
+                    "id": it.get("id", ""),
                     "category": it.get("category", ""),
                     "theme": it.get("theme", ""),
                     "prompt": it.get("prompt", ""),
@@ -354,22 +418,21 @@ def save_csv(items, path: Path):
 
 
 def save_prompts(items, path: Path):
-    lines = [
-        normalize_mj_prefix(it.get("prompt", "")) for it in items if it.get("prompt")
-    ]
+    lines = []
+    for it in items:
+        p = it.get("prompt", "")
+        if not p:
+            continue
+        lines.append(normalize_mj_prefix(p))
     path.write_text("\n".join(lines), encoding="utf-8")
     print("saved prompts:", path)
 
 
-# ==========================================================
-# 7. path helpers
-# ==========================================================
+# ------------------------------------------------------------------
+# Path helpers
+# ------------------------------------------------------------------
+
 def resolve_list_path(list_arg: str) -> Path:
-    """
-    list csv:
-    - if absolute path → use directly
-    - if relative path → resolve under ./data/ (inside the autovisuals package)
-    """
     p = Path(list_arg)
     if p.is_absolute():
         return p
@@ -377,40 +440,33 @@ def resolve_list_path(list_arg: str) -> Path:
 
 
 def resolve_output_root(out_arg: str) -> Path:
-    """
-    output root:
-    - if absolute path → use directly
-    - if relative path → resolve under BASE_DIR (autovisuals/)
-    """
     p = Path(out_arg)
     if p.is_absolute():
         return p
-    return BASE_DIR / out_arg
+    return PROJECT_ROOT / p
 
 
-# ==========================================================
-# 8. main orchestration
-# ==========================================================
-def main(provider, list_arg, mode, title_mode, n, repeat, out_arg):
+# ------------------------------------------------------------------
+# Public main() used by cli.py
+# ------------------------------------------------------------------
+
+def main(
+    provider: str,
+    list_arg: str,
+    mode: str,
+    title_mode: str,
+    n: int,
+    repeat: int,
+    out_arg: str,
+):
     """
     Orchestrate generation from CLI-style arguments.
 
-    This function can be imported and called from downstream scripts,
-    e.g.:
-
-        from autovisuals.get_mj_prompt import main as generate_prompts
-
-        generate_prompts(
-            provider="openai",
-            list_arg="adobe_cat.csv",
-            mode="r",
-            title_mode="r",
-            n=10,
-            repeat=5,
-            out_arg="prompt",
-        )
+    PROJECT_ROOT/<out>/YYYY-MM-DD/<category-slug>/
+        meta.json
+        meta.csv
+        prompt.txt
     """
-
     provider = provider.lower()
     mode = "manual" if mode.lower().startswith("m") else "random"
     title_mode = "manual" if title_mode.lower().startswith("m") else "random"
@@ -420,7 +476,7 @@ def main(provider, list_arg, mode, title_mode, n, repeat, out_arg):
         raise FileNotFoundError(f"theme list csv not found: {csv_path}")
 
     out_root = resolve_output_root(out_arg)
-    out_dir = out_root / TIMESTAMP
+    date_str = datetime.now().date().isoformat()
 
     print(f"provider      : {provider}")
     print(f"theme list    : {csv_path}")
@@ -429,6 +485,7 @@ def main(provider, list_arg, mode, title_mode, n, repeat, out_arg):
     print(f"records       : {n}")
     print(f"--r repeat    : {repeat}")
     print(f"output root   : {out_root}")
+    print(f"date folder   : {date_str}")
     print(f"api key loaded: yes\n")
 
     themes, weights = load_themes_with_weights(csv_path)
@@ -439,8 +496,9 @@ def main(provider, list_arg, mode, title_mode, n, repeat, out_arg):
     print()
 
     items = []
+    used_ids: set[str] = set()
 
-    # manual theme mode
+    # manual theme
     if mode == "manual":
         theme = input("enter theme: ").strip()
         if not theme:
@@ -457,161 +515,88 @@ def main(provider, list_arg, mode, title_mode, n, repeat, out_arg):
             rec = generate_for_theme(provider, theme, repeat)
             if custom_title:
                 rec["title"] = custom_title
+
+            if "category" not in rec or not rec["category"]:
+                rec["category"] = "uncategorized"
+
+            content = rec.get("prompt", "")
+            full_prompt = normalize_mj_prefix(content)
+            uid = generate_id(used_ids)
+            rec["id"] = uid
+            rec["prompt"] = attach_id_tag(full_prompt, uid)
             items.append(rec)
 
-    # random theme mode (weighted by theme weights)
+    # random theme (weighted)
     else:
         for i in range(n):
             theme = random.choices(themes, weights=weights, k=1)[0]
             print(f"[{i+1}/{n}] theme = {theme!r}")
             rec = generate_for_theme(provider, theme, repeat)
+
+            if "category" not in rec or not rec["category"]:
+                rec["category"] = "uncategorized"
+
+            content = rec.get("prompt", "")
+            full_prompt = normalize_mj_prefix(content)
+            uid = generate_id(used_ids)
+            rec["id"] = uid
+            rec["prompt"] = attach_id_tag(full_prompt, uid)
             items.append(rec)
 
-    out_dir.mkdir(parents=True, exist_ok=True)
+    date_dir = out_root / date_str
+    date_dir.mkdir(parents=True, exist_ok=True)
 
-    save_json(items, out_dir / "meta.json")
-    save_csv(items, out_dir / "meta.csv")
-    save_prompts(items, out_dir / "prompt.txt")
+    by_cat_slug: dict[str, list[dict]] = defaultdict(list)
+    for rec in items:
+        cat_text = rec.get("category", "") or "uncategorized"
+        slug = slug_from_text(cat_text)
+        by_cat_slug[slug].append(rec)
+
+    for slug, recs in by_cat_slug.items():
+        cat_dir = date_dir / slug
+        cat_dir.mkdir(parents=True, exist_ok=True)
+
+        save_json(recs, cat_dir / "meta.json")
+        save_csv(recs, cat_dir / "meta.csv")
+        save_prompts(recs, cat_dir / "prompt.txt")
 
     print("\nall done.")
 
 
-# ==========================================================
-# 9. cli
-# ==========================================================
+# ------------------------------------------------------------------
+# Stand-alone usage (optional)
+# ------------------------------------------------------------------
+
 def parse_args():
     p = argparse.ArgumentParser(
         prog="python -m autovisuals.get_mj_prompt",
         description="generate metadata + midjourney prompts from theme list",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=f"""
-api key usage
-=============
-export API_KEY="sk-openai-xxxxx"   # openai gpt-5.1
-export API_KEY="sk-ant-xxxxx"      # claude 3
-export API_KEY="AIza-xxxxx"        # gemini 1.5
-
-theme list (-l)
-===============
-- csv format: theme,weight
-- default: data/{DEFAULT_LIST_FILE} (inside the autovisuals package)
-- if path is relative → resolved under autovisuals/data/
-- if path is absolute → used directly
-
-output root (-o)
-================
-- default: {DEFAULT_OUT_DIR}/
-- actual output stored in: <out>/<timestamp>/
-- if relative → resolved under the autovisuals/ package directory
-
-examples
-========
-python -m autovisuals.get_mj_prompt -p openai    -l adobe_cat.csv -m r -t r -d 10 -r 5 -o prompt
-python -m autovisuals.get_mj_prompt -p anthropic -l my_themes.csv  -m m -t m -d 5  -r 4 -o results
-python -m autovisuals.get_mj_prompt -p gemini    -l /abs/list.csv  -m r -t r -d 3  -r 2 -o out
-""",
     )
 
-    # order: -p, -l, -m, -t, -d, -r, -o
     p.add_argument(
         "-p",
         "--provider",
-        choices=["openai", "anthropic", "gemini"],
+        choices=["openai", "anthropic", "gemini", "llama", "deepseek"],
         default=DEFAULT_PROVIDER,
-        help="chatbot api provider",
     )
-
-    p.add_argument(
-        "-l",
-        "--list",
-        default=DEFAULT_LIST_FILE,
-        help="theme list csv (theme,weight); relative paths are under autovisuals/data/",
-    )
-
-    p.add_argument(
-        "-m",
-        "--mode",
-        choices=["r", "m", "random", "manual"],
-        default="r",
-        help="theme mode: random (weighted by csv) or manual",
-    )
-
-    p.add_argument(
-        "-t",
-        "--title",
-        choices=["r", "m", "random", "manual"],
-        default="r",
-        help="title mode: random or manual (manual only used when theme is manual)",
-    )
-
-    p.add_argument(
-        "-d",
-        "--records",
-        type=int,
-        default=DEFAULT_NUM_ITEMS,
-        help=f"number of records to generate (default {DEFAULT_NUM_ITEMS})",
-    )
-
-    p.add_argument(
-        "-r",
-        "--repeat",
-        type=int,
-        default=DEFAULT_REPEAT,
-        help=f"value for midjourney --r flag (default {DEFAULT_REPEAT})",
-    )
-
-    p.add_argument(
-        "-o",
-        "--out",
-        default=DEFAULT_OUT_DIR,
-        help=f"output root folder (default: {DEFAULT_OUT_DIR}/)",
-    )
+    p.add_argument("-l", "--list", default=DEFAULT_LIST_FILE)
+    p.add_argument("-m", "--mode", default="r", choices=["r", "m", "random", "manual"])
+    p.add_argument("-t", "--title", default="r", choices=["r", "m", "random", "manual"])
+    p.add_argument("-d", "--records", type=int, default=DEFAULT_NUM_ITEMS)
+    p.add_argument("-r", "--repeat", type=int, default=DEFAULT_REPEAT)
+    p.add_argument("-o", "--out", default=DEFAULT_OUT_DIR)
 
     return p.parse_args()
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    a = parse_args()
     main(
-        provider=args.provider,
-        list_arg=args.list,
-        mode=args.mode,
-        title_mode=args.title,
-        n=args.records,
-        repeat=args.repeat,
-        out_arg=args.out,
+        provider=a.provider,
+        list_arg=a.list,
+        mode=a.mode,
+        title_mode=a.title,
+        n=a.records,
+        repeat=a.repeat,
+        out_arg=a.out,
     )
-
-
-# ==========================================================
-# 10. mj prompt normalizer
-# ==========================================================
-def normalize_mj_prefix(prompt: str) -> str:
-    """
-    Ensure the prompt begins with exactly '/imagine prompt:' (no trailing space).
-    """
-    s = prompt.strip()
-    low = s.lower()
-
-    # already correct → remove any spaces after colon
-    if low.startswith("/imagine prompt:"):
-        rest = s[len("/imagine prompt:"):].lstrip()  # remove the space after colon
-        return f"/imagine prompt:{rest}"
-
-    # missing colon but starts with prefix
-    if low.startswith("/imagine prompt"):
-        rest = s[len("/imagine prompt"):].lstrip(": ").lstrip()
-        return f"/imagine prompt:{rest}"
-
-    # missing slash
-    if low.startswith("imagine prompt:"):
-        rest = s[len("imagine prompt:"):].lstrip()
-        return f"/imagine prompt:{rest}"
-
-    if low.startswith("imagine prompt"):
-        rest = s[len("imagine prompt"):].lstrip(": ").lstrip()
-        return f"/imagine prompt:{rest}"
-
-    # no prefix at all
-    return f"/imagine prompt:{s}"
-
