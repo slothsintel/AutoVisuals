@@ -70,6 +70,11 @@ Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `downl
 ## 📊 Status Summary
 Run `autovisuals status` to show how many prompts/images exist per date/category.
 
+<p align="right">
+  <a href="#top" style="font-weight:bold;text-decoration:none;">
+    ⬆️ Return to top
+  </a>
+</p>
 ---
 
 # 🧩 Installation
@@ -104,6 +109,11 @@ source ~/.bashrc
 Install scaling proccessor (optional):
 
 *WIP*
+<p align="right">
+  <a href="#top" style="font-weight:bold;text-decoration:none;">
+    ⬆️ Return to top
+  </a>
+</p>
 
 ---
 
@@ -128,6 +138,12 @@ export MJ_CHANNEL_ID="123456789012345678"
 For scaling(optional):
 
 *WIP*
+<p align="right">
+  <a href="#top" style="font-weight:bold;text-decoration:none;">
+    ⬆️ Return to top
+  </a>
+</p>
+
 ---
 
 # 🧠 Usage
@@ -218,6 +234,11 @@ DATE         CATEGORY             PROMPTS   IMAGES
 ---------------------------------------------------
 TOTAL                                6        24
 ```
+<p align="right">
+  <a href="#top" style="font-weight:bold;text-decoration:none;">
+    ⬆️ Return to top
+  </a>
+</p>
 
 ---
 
@@ -236,6 +257,11 @@ AutoVisuals now includes two **completely free** API providers:
 - Extremely fast  
 - Stable JSON outputs  
 - Endpoint: https://api.deepseek.com/free/chat/completions
+<p align="right">
+  <a href="#top" style="font-weight:bold;text-decoration:none;">
+    ⬆️ Return to top
+  </a>
+</p>
 
 ---
 
@@ -273,3 +299,8 @@ MIT License.
 # 🦥 About Sloths Visuals
 
 A creative visualisation brand under **Sloths Intel**, specialising in data visulisation and automated illustration pipelines.
+<p align="right">
+  <a href="#top" style="font-weight:bold;text-decoration:none;">
+    ⬆️ Return to top
+  </a>
+</p>
