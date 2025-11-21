@@ -1,4 +1,4 @@
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="250" />
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="-50" />
 
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine  
@@ -25,8 +25,13 @@
 # 📊 Contents
 - [Features](#Features)
 - [Installation](#Installation)
+--  [From pip](#From-pip)
+--  [From conda](#From-conda)
+--  [From source(advanced)](#From-source(advanced))
 - [Required Environment Variables](#RequiredEnvironment-Variables)
 - [Usage](#Usage)
+--  [Pipeline](#Pipeline)
+--  [Subcommand](#Subcommand)
 - [Free Providers Included](#Free-Providers-Included)
 - [Theme List Format](#Theme-List-Format)
 - [Future Modules](#Future-Modules)
@@ -65,18 +70,24 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 
 # 🧩 Installation
 
+## From pip
+
+## From conda
+
+## From source (advanced)
+
 ####  Clone the repository
 ```bash
 git clone https://github.com/slothsintel/AutoVisuals
 cd AutoVisuals
 ```
 
-### Install environment
+#### Install environment
 ```bash
 pip install -r requirements.txt
 ```
 
-### Add to PATH
+#### Add to PATH
 ```bash
 echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH"' >> ~/.bashrc
 source ~/.bashrc
@@ -86,17 +97,17 @@ source ~/.bashrc
 
 # 🔐 Required Environment Variables
 
-### For prompt generation, where to get [openai api]():
+#### For prompt generation, where to get [openai api]():
 ```
 export API_KEY="your LLM API key"
 ```
 
-### For Discord prompt sending, where to get [discord webhook]():
+#### For Discord prompt sending, where to get [discord webhook]():
 ```
 export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
-### For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
+#### For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
 ```
 export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
@@ -106,7 +117,7 @@ export MJ_CHANNEL_ID="123456789012345678"
 
 # 🧠 Usage
 
----
+### Pipeline
 
 Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery`
 
@@ -116,7 +127,7 @@ Option
 -h, --help        show this help message and exit.
 -p, --provider    chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
 -l, --list        list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
--m, --mode        mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
+-m, --mode        mode to generate prompts by themes, choose r(random) by default or m(manual).
 -t, --title       title to generate prompts, choose r(weight random) by default or m(manual) input.
 -d, --records     number of prompts for each theme and title, 3 by default.
 -r, --repeat      number of times to repeat each prompt for diversity, 5 by default.
@@ -128,6 +139,8 @@ Option
 ```
 ---
 
+### Subcommand
+
 Subcommand `autovisuals generate` to generate prompts + metadata
 
 Option
@@ -135,7 +148,7 @@ Option
 -h, --help        show this help message and exit.
 -p, --provider    chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
 -l, --list        list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
--m, --mode        mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
+-m, --mode        mode to generate prompts by themes, choose r(random) by default or m(manual).
 -t, --title       title to generate prompts, choose r(weight random) by default or m(manual) input.
 -d, --records     number of prompts for each theme and title, 3 by default.
 -r, --repeat      number of times to repeat each prompt for diversity, 5 by default.
