@@ -1,7 +1,8 @@
 <a id="top"></a>
+
+# 🦥 AutoVisuals
 <p align="right"><a href="#top">⬆️ Top</a></p>
 
-# 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine
 
 <img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="800" />
