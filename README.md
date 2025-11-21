@@ -19,6 +19,10 @@
 
 ---
 
+# 📊 Contents
+
+---
+
 # ⭐ Features
 
 ### 🔮 Prompt & Metadata Generator
@@ -102,165 +106,85 @@ export MJ_CHANNEL_ID="123456789012345678"
 
 ---
 
-Run
+Pipeline command: generate → send → download → gallery
 
 ```
-autovisuals -h
+autovisuals pipeline
 ```
-
-Output
-
-```
-usage: autovisuals [-h] {generate,discord,download,gallery,pipeline,status} ...
-
-AutoVisuals – automatic prompt & gallery pipeline.
-
-positional arguments:
-  {generate,discord,download,gallery,pipeline,status}
-    generate            Generate prompts + metadata.
-    discord             Send prompts to Discord webhook.
-    download            Download Midjourney images.
-    gallery             Build HTML gallery.
-    pipeline            Full pipeline: generate → send → download → gallery.
-    status              Show a tiny summary of prompts + images per date/category.
-
-options:
-  -h, --help            show this help message and exit
-```
-
----
-
-Run
+option
 
 ```
-autovisuals generate -h
-```
-
-Output
-
-```
-usage: autovisuals generate [-h] [-p PROVIDER] [-l LIST] [-m MODE] [-t TITLE] [-d RECORDS] [-r REPEAT] [-o OUT]
-
-options:
-  -h, --help            show this help message and exit
-  -p, --provider PROVIDER
-  -l, --list LIST
-  -m, --mode MODE
-  -t, --title TITLE
-  -d, --records RECORDS
-  -r, --repeat REPEAT
-  -o, --out OUT
-```
-
----
-
-Run
-
-```
-autovisuals discord -h
-```
-
-Output
-
-```
-usage: autovisuals discord [-h] [-w WEBHOOK] [--category CATEGORY] [--all-categories]
-
-options:
-  -h, --help            show this help message and exit
-  -w, --webhook WEBHOOK
-                        Webhook URL (or WEBHOOK_URL env).
-  --category CATEGORY   Specific category slug to send.
-  --all-categories      Send prompts for all categories for latest date.
-```
-
----
-
-Run
-
-```
-autovisuals download -h
-```
-
-Outputs
-
-```
-usage: autovisuals download [-h] [-t TOKEN] [-c CHANNEL_ID] [-o OUT] [--limit LIMIT] [--idle-seconds IDLE_SECONDS]
-
-options:
-  -h, --help            show this help message and exit
-  -t, --token TOKEN     Discord bot token (or DISCORD_BOT_TOKEN).
-  -c, --channel-id CHANNEL_ID
-                        Discord channel id (or MJ_CHANNEL_ID).
-  -o, --out OUT         Download root folder.
-  --limit LIMIT         Stop after N images (default: no limit).
-  --idle-seconds IDLE_SECONDS
-                        Auto-stop after this many seconds of inactivity (default: 180). Use 0 to disable.
+-h, --help          show this help message and exit.
+-p, --provider      chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
+-l, --list          list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
+-m, --mode          mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
+-t, --title         title to generate prompts, choose r(weight random) by default or m(manual) input.
+-d, --records       number of prompts for each theme and title, 3 by default.
+-r, --repeat        number of the same prompt to run in midjourney, 5 by default.
+-o, --out           prompt output directory, prompt/<date>/<theme> by default.
+-w, --webhook       webhook URL, need to export it as environment variable.
+--download-dir      images download directory, mj_downloads/<date>/<theme> by default.
+--gallery-out       gallery file output directory, mj_gallery.html by default.
+--idle-seconds      downloader idle timeout in seconds to proccess gallery, 180 by default.
 ```
 ---
 
-Run
+Subcommand to generate prompts + metadata
 
 ```
-autovisuals gallery -h
+autovisuals generate
+```
+option
+```
+-h, --help          show this help message and exit.
+-p, --provider      chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
+-l, --list          list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
+-m, --mode          mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
+-t, --title         title to generate prompts, choose r(weight random) by default or m(manual) input.
+-d, --records       number of prompts for each theme and title, 3 by default.
+-r, --repeat        number of the same prompt to run in midjourney, 5 by default.
+-o, --out           prompt output directory, prompt/<date>/<theme> by default.       
 ```
 
-Outputs
-
+Subcommand to send prompts to Discord webhook
 ```
-usage: autovisuals gallery [-h] [--download-dir DOWNLOAD_DIR] [--prompt-dir PROMPT_DIR] [--out OUT]
-
-options:
-  -h, --help            show this help message and exit
-  --download-dir DOWNLOAD_DIR
-                        MJ image root.
-  --prompt-dir PROMPT_DIR
-                        Prompt root.
-  --out OUT             Gallery HTML output file.
+autovisuals discord
 ```
----
-
-Run all above in a pipeline
-
-```
-autovisuals pipeline -h
+-h, --help          show this help message and exit.
+-o, --out           prompt output directory, prompt/<date>/<theme> by default.
+--category          specific category slug to send, true by default.
+--all-categories    send prompts for all categories for latest date, true by default.
 ```
 
-Outputs
-
+Subcommand to download Midjourney images
 ```
-usage: autovisuals pipeline [-h] [-p PROVIDER] [-l LIST] [-m MODE] [-t TITLE] [-d RECORDS] [-r REPEAT] [-o OUT] [-w WEBHOOK]
-                            [--download-dir DOWNLOAD_DIR] [--gallery-out GALLERY_OUT] [--idle-seconds IDLE_SECONDS]
-
-options:
-  -h, --help            show this help message and exit
-  -p, --provider PROVIDER
-  -l, --list LIST
-  -m, --mode MODE
-  -t, --title TITLE
-  -d, --records RECORDS
-  -r, --repeat REPEAT
-  -o, --out OUT         Prompt output root (used also as prompt_dir for gallery).
-  -w, --webhook WEBHOOK
-                        Webhook URL (or WEBHOOK_URL env).
-  --download-dir DOWNLOAD_DIR
-                        Download directory for images.
-  --gallery-out GALLERY_OUT
-                        Output gallery HTML file.
-  --idle-seconds IDLE_SECONDS
-                        Downloader idle timeout in seconds (default: 180).
+option
 ```
----
-
-# 📊 Status Command
-
-Fast overview of prompts & images:
-
-```
-autovisuals status
+-h, --help          show this help message and exit.
+-t, --token         discord bot token, need to export it as environment variable.
+-c, --channel-id    discord channel id, need to export it as environment variable.
+-o, --out OUT       images download directory, mj_downloads/<date>/<theme> by default.
+--limit LIMIT       stop after N images, no limit by default.
+--idle-seconds      downloader idle timeout in seconds to proccess gallery, 180 by default.       
 ```
 
-Example:
+Subcommand to build HTML gallery
+```
+autovisuals gallery           
+```
+option
+```
+-h, --help          show this help message and exit.
+--download-dir      images download directory, mj_downloads/<date>/<theme> by default.
+--prompt-dir        prompt output directory, prompt/<date>/<theme> by default.   
+--out OUT           gallery file output directory, mj_gallery.html by default.     
+```
 
+Additional command to Show a tidy summary of prompts + images per date/theme
+```
+autovisuals status            
+```
+example
 ```
 DATE         CATEGORY             PROMPTS   IMAGES
 2025-11-21   business                  3        12
