@@ -1,7 +1,7 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine
 
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="0" />
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="50" />
 
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 
@@ -99,17 +99,17 @@ source ~/.bashrc
 # 🔐 Required Environment Variables
 
 For prompt generation, where to get [openai api]():
-```
+```bash
 export API_KEY="your LLM API key"
 ```
 
 For Discord prompt sending, where to get [discord webhook]():
-```
+```bash
 export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
 For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
-```
+```bash
 export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
 ```
