@@ -1,8 +1,6 @@
 <a id="top"></a>
 
 # 🦥 AutoVisuals
-<p align="right"><a href="#top">⬆️ Top</a></p>
-
 ### Automated Illustration & Prompt Generation Engine
 
 <img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="800" />
@@ -72,9 +70,10 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 
 <p align="right">
   <a href="#top" style="font-weight:bold;text-decoration:none;">
-    ⬆️ Return to top
+    ⬆️
   </a>
 </p>
+
 ---
 
 # 🧩 Installation
@@ -109,9 +108,10 @@ source ~/.bashrc
 Install scaling proccessor (optional):
 
 *WIP*
+
 <p align="right">
   <a href="#top" style="font-weight:bold;text-decoration:none;">
-    ⬆️ Return to top
+    ⬆️
   </a>
 </p>
 
@@ -140,7 +140,7 @@ For scaling(optional):
 *WIP*
 <p align="right">
   <a href="#top" style="font-weight:bold;text-decoration:none;">
-    ⬆️ Return to top
+    ⬆️
   </a>
 </p>
 
@@ -236,7 +236,7 @@ TOTAL                                6        24
 ```
 <p align="right">
   <a href="#top" style="font-weight:bold;text-decoration:none;">
-    ⬆️ Return to top
+    ⬆️
   </a>
 </p>
 
@@ -259,7 +259,7 @@ AutoVisuals now includes two **completely free** API providers:
 - Endpoint: https://api.deepseek.com/free/chat/completions
 <p align="right">
   <a href="#top" style="font-weight:bold;text-decoration:none;">
-    ⬆️ Return to top
+    ⬆️
   </a>
 </p>
 
@@ -301,6 +301,6 @@ MIT License.
 A creative visualisation brand under **Sloths Intel**, specialising in data visulisation and automated illustration pipelines.
 <p align="right">
   <a href="#top" style="font-weight:bold;text-decoration:none;">
-    ⬆️ Return to top
+    ⬆️
   </a>
 </p>
