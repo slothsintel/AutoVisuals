@@ -1,7 +1,7 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine
 
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="500" />
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="800" />
 
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 
@@ -78,18 +78,19 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 ## From source (advanced)
 
 Clone the repository.
-```bash
+```shell
 git clone https://github.com/slothsintel/AutoVisuals
 cd AutoVisuals
 ```
 
 Install environment.
-```bash
+
+```shell
 pip install -r requirements.txt
 ```
 
 Add to PATH.
-```bash
+```shell
 echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
@@ -99,17 +100,17 @@ source ~/.bashrc
 # 🔐 Required Environment Variables
 
 For prompt generation, where to get [openai api]():
-```bash
+```shell
 export API_KEY="your LLM API key"
 ```
 
 For Discord prompt sending, where to get [discord webhook]():
-```bash
+```shell
 export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
 For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
-```bash
+```shell
 export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
 ```
