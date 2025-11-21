@@ -1,3 +1,6 @@
+<a id="top"></a>
+<p align="right"><a href="#top">⬆️ Top</a></p>
+
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine
 
@@ -56,7 +59,7 @@
   - **Prev/Next navigation**.
   - **Back to Gallery**.
 
-## Scale Process
+## Scaling Processor (optional)
 
 *WIP*
 
@@ -97,6 +100,9 @@ Add to PATH.
 echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
+Install scaling proccessor (optional):
+
+*WIP*
 
 ---
 
@@ -129,7 +135,7 @@ For scaling(optional):
 
 Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery` → `scale`(if dependencie installed).
 
-Option
+Option:
 
 ```
 -h, --help        show this help message and exit.
@@ -150,7 +156,7 @@ Option
 
 Subcommand `autovisuals generate` to generate prompts + metadata.
 
-Option
+Option:
 ```
 -h, --help        show this help message and exit.
 -p, --provider    chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
@@ -162,9 +168,9 @@ Option
 -o, --out         prompt output directory, prompt/<date>/<theme> by default.
 ```
 
-Subcommand `autovisuals discord` to send prompts to Discord webhook
+Subcommand `autovisuals discord` to send prompts to Discord webhook.
 
-Option
+Option:
 ```
 -h, --help        show this help message and exit.
 -o, --out         prompt output directory, prompt/<date>/<theme> by default.
@@ -172,9 +178,9 @@ Option
 --all-categories  send prompts for all categories for latest date, true by default.
 ```
 
-Subcommand `autovisuals download` to download Midjourney images
+Subcommand `autovisuals download` to download Midjourney images.
 
-Option
+Option:
 ```
 -h, --help        show this help message and exit.
 -t, --token       discord bot token, need to export it as environment variable.
@@ -184,9 +190,9 @@ Option
 --idle-seconds    downloader idle timeout in seconds to proccess gallery, 180 by default.
 ```
 
-Subcommand `autovisuals gallery` to build HTML gallery
+Subcommand `autovisuals gallery` to build HTML gallery.
 
-Option
+Option:
 ```
 -h, --help        show this help message and exit.
 --download-dir    images download directory, mj_downloads/<date>/<theme> by default.
@@ -194,16 +200,16 @@ Option
 --out OUT         gallery file output directory, mj_gallery.html by default.
 ```
 
-Subcommand `autovisuals scale` to scale downloaded images to upload to stock (optional)
+Subcommand `autovisuals scale` to scale downloaded images to upload to stock (optional).
 
-Option
+Option:
 ```
 *WIP*
 ```
 
-Additional command `autovisuals status` to Show a tidy summary of prompts + images per date/theme
+Additional command `autovisuals status` to Show a tidy summary of prompts + images per date/theme.
 
-Example
+Example:
 ```
 DATE         CATEGORY             PROMPTS   IMAGES
 2025-11-21   business                  3        12
