@@ -85,48 +85,47 @@ def build_parser() -> argparse.ArgumentParser:
 
     # generate
     gen = subparsers.add_parser("generate", help="Generate prompts + metadata.")
-    gen.add_argument("-p", "--provider", default="openai")
-    gen.add_argument("-l", "--list", default=DEFAULT_THEME_CSV)
-    gen.add_argument("-m", "--mode", default="r")
-    gen.add_argument("-t", "--title", default="r")
-    gen.add_argument("-d", "--records", type=int, default=3)
-    gen.add_argument("-r", "--repeat", type=int, default=5)
-    gen.add_argument("-o", "--out", default=DEFAULT_OUT_PROMPT)
+    gen.add_argument("-p", "--provider", default="openai", help="chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.")
+    gen.add_argument("-l", "--list", default=DEFAULT_THEME_CSV, help="list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.")
+    gen.add_argument("-m", "--mode", default="r", help="mode to generate prompts by themes, choose r(weighted random) by default or m(manual).")
+    gen.add_argument("-t", "--title", default="r", help="title mode to generate titles for prompts, choose r(weighted random) by default or m(manual).")
+    gen.add_argument("-d", "--records", type=int, default=3, help="number of prompts for each theme and title, 3 by default.")
+    gen.add_argument("-r", "--repeat", type=int, default=5, help="number of times to repeat each prompt for diversity, 5 by default.")
+    gen.add_argument("-o", "--out", default=DEFAULT_OUT_PROMPT, help="prompt output directory, prompt/<date>/<theme> by default.")
 
     # discord
     dis = subparsers.add_parser("discord", help="Send prompts to Discord webhook.")
-    dis.add_argument("-w", "--webhook", help="Webhook URL (or WEBHOOK_URL env).")
-    dis.add_argument("--category", help="Specific category slug to send.")
+    dis.add_argument("-w", "--webhook", help="webhook URL, need to export it as environment variable.")
+    dis.add_argument("--category", help="specific category slug to send, true by default.")
     dis.add_argument(
         "--all-categories",
         action="store_true",
-        help="Send prompts for all categories for latest date.",
+        help="send prompts for all categories for latest date, true by default.",
     )
 
     # download
     dl = subparsers.add_parser("download", help="Download Midjourney images.")
-    dl.add_argument("-t", "--token", help="Discord bot token (or DISCORD_BOT_TOKEN).")
+    dl.add_argument("-t", "--token", help="discord bot token, need to export it as environment variable.")
     dl.add_argument(
-        "-c", "--channel-id", type=int, help="Discord channel id (or MJ_CHANNEL_ID)."
+        "-c", "--channel-id", type=int, help="discord channel id, need to export it as environment variable."
     )
     dl.add_argument(
         "-o",
         "--out",
         default=DEFAULT_DOWNLOAD_DIR,
-        help="Download root folder.",
+        help="images download directory, mj_downloads/<date>/<theme> by default.",
     )
     dl.add_argument(
         "--limit",
         type=int,
         default=None,
-        help="Stop after N images (default: no limit).",
+        help="stop after N images, no limit by default.",
     )
     dl.add_argument(
         "--idle-seconds",
         type=int,
         default=DEFAULT_IDLE_SECONDS,
-        help=f"Auto-stop after this many seconds of inactivity (default: {DEFAULT_IDLE_SECONDS}). "
-        "Use 0 to disable.",
+        help=f"downloader idle timeout in seconds to proccess gallery, {DEFAULT_IDLE_SECONDS} by default.",
     )
 
     # gallery
@@ -134,17 +133,17 @@ def build_parser() -> argparse.ArgumentParser:
     gal.add_argument(
         "--download-dir",
         default=DEFAULT_DOWNLOAD_DIR,
-        help="MJ image root.",
+        help="images download directory, mj_downloads/<date>/<theme> by default.",
     )
     gal.add_argument(
         "--prompt-dir",
         default=DEFAULT_OUT_PROMPT,
-        help="Prompt root.",
+        help="prompt output directory, prompt/<date>/<theme> by default.",
     )
     gal.add_argument(
         "--out",
         default=DEFAULT_GALLERY_HTML,
-        help="Gallery HTML output file.",
+        help="gallery file output directory, mj_gallery.html by default.",
     )
 
     # pipeline
@@ -154,58 +153,58 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # generation
-    pipe.add_argument("-p", "--provider", default="openai")
-    pipe.add_argument("-l", "--list", default=DEFAULT_THEME_CSV)
-    pipe.add_argument("-m", "--mode", default="r")
-    pipe.add_argument("-t", "--title", default="r")
-    pipe.add_argument("-d", "--records", type=int, default=3)
-    pipe.add_argument("-r", "--repeat", type=int, default=5)
+    pipe.add_argument("-p", "--provider", default="openai", help="chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.")
+    pipe.add_argument("-l", "--list", default=DEFAULT_THEME_CSV, help="list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.")
+    pipe.add_argument("-m", "--mode", default="r", help="mode to generate prompts by themes, choose r(weighted random) by default or m(manual).")
+    pipe.add_argument("-t", "--title", default="r", help="title mode to generate titles for prompts, choose r(weighted random) by default or m(manual).")
+    pipe.add_argument("-d", "--records", type=int, default=3, help="number of prompts for each theme and title, 3 by default.")
+    pipe.add_argument("-r", "--repeat", type=int, default=5, help="number of times to repeat each prompt for diversity, 5 by default.")
     pipe.add_argument(
         "-o",
         "--out",
         default=DEFAULT_OUT_PROMPT,
-        help="Prompt output root (used also as prompt_dir for gallery).",
+        help="prompt output directory, prompt/<date>/<theme> by default.",
     )
 
     # discord
-    pipe.add_argument("-w", "--webhook", help="Webhook URL (or WEBHOOK_URL env).")
+    pipe.add_argument("-w", "--webhook", help="webhook URL, need to export it as environment variable.")
 
     # download + gallery
     pipe.add_argument(
         "--download-dir",
         default=DEFAULT_DOWNLOAD_DIR,
-        help="Download directory for images.",
+        help="images download directory, mj_downloads/<date>/<theme> by default.",
     )
     pipe.add_argument(
         "--gallery-out",
         default=DEFAULT_GALLERY_HTML,
-        help="Output gallery HTML file.",
+        help="gallery file output directory, mj_gallery.html by default.",
     )
     pipe.add_argument(
         "--idle-seconds",
         type=int,
         default=DEFAULT_IDLE_SECONDS,
-        help=f"Downloader idle timeout in seconds (default: {DEFAULT_IDLE_SECONDS}).",
+        help=f"downloader idle timeout in seconds to proccess gallery, {DEFAULT_IDLE_SECONDS} by default.",
     )
 
     # status
     status = subparsers.add_parser(
         "status",
-        help="Show a tiny summary of prompts + images per date/category.",
+        help="show a tidy summary of prompts + images per date/category.",
     )
     status.add_argument(
         "--prompt-dir",
         default=DEFAULT_OUT_PROMPT,
-        help="Root folder for prompt data (default: prompt).",
+        help="root folder for prompt data (default: prompt).",
     )
     status.add_argument(
         "--download-dir",
         default=DEFAULT_DOWNLOAD_DIR,
-        help="Root folder for downloaded images (default: mj_downloads).",
+        help="root folder for downloaded images (default: mj_downloads).",
     )
     status.add_argument(
         "--date",
-        help="Only show this YYYY-MM-DD date (default: all dates found under prompt/).",
+        help="only show this YYYY-MM-DD date (default: all dates found under prompt/).",
     )
 
     return parser
