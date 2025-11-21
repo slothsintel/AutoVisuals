@@ -4,25 +4,25 @@
 <img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="800" />
 
 <p style="margin:0">
-[![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
+  [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 </p>
 <p style="margin:0">
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 </p>
 <p style="margin:0">
-[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
+  [![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
 </p>
 <p style="margin:0">
-[![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
+  [![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
 </p>
 <p style="margin:0">
-[![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
+  [![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
 </p>
 <p style="margin:0">
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
+  [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
 </p>
 <p style="margin:0">
-[![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
+  [![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
 </p>
 
 
