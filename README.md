@@ -20,7 +20,7 @@
 
 ---
 
-# 📊 Contents
+# Contents
 - [Features](#Features)
 - [Installation](#Installation)
   - [From pip](#From-pip)
@@ -39,19 +39,19 @@
 
 ---
 
-# ⭐ Features
+# Features
 
-## 🔮 Prompt & Metadata Generator
+## Prompt & Metadata Generator
 - Generates output: **category**, **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
 - Supports output formats: **txt**, **csv**, and **json**.
 
-## 🤖 Discord Automation
+## Discord Automation
 - Sends each prompt line to any Discord channel via **webhook**.
 - Confirms each prompt in your private server with [one click]().
 - Downloads MJ bot images via **Discord bot token**.
 - Auto-splits 2×2 grids into 4 tiles.
 
-## 🖼️ HTML Gallery Builder
+## HTML Gallery Builder
 - Builds a techno-tidy responsive gallery:
   - Date → Category → Images  
 - Zoom mode includes:
@@ -62,21 +62,21 @@
 
 *WIP*
 
-## 🚀 Full Pipeline Command
+## Full Pipeline Command
 Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `gallery` → `scale`(if dependencie installed).
 
-## 📊 Status Summary
+## Status Summary
 Run `autovisuals status` to show how many prompts/images exist per date/category.
 
 <p align="right">
-  <a href="#top" style="font-weight:bold;text-decoration:none;">
+  <a href="#top" style="text-decoration:none;">
     ⬆️
   </a>
 </p>
 
 ---
 
-# 🧩 Installation
+# Installation
 
 ## From pip
 
@@ -110,14 +110,14 @@ Install scaling proccessor (optional):
 *WIP*
 
 <p align="right">
-  <a href="#top" style="font-weight:bold;text-decoration:none;">
+  <a href="#top" style="text-decoration:none;">
     ⬆️
   </a>
 </p>
 
 ---
 
-# 🔐 Required Environment Variables
+# Required Environment Variables
 
 For prompt generation, where to get [openai api]():
 ```shell
@@ -139,14 +139,14 @@ For scaling(optional):
 
 *WIP*
 <p align="right">
-  <a href="#top" style="font-weight:bold;text-decoration:none;">
+  <a href="#top" style="text-decoration:none;">
     ⬆️
   </a>
 </p>
 
 ---
 
-# 🧠 Usage
+# Usage
 
 ## Pipeline
 
@@ -235,37 +235,37 @@ DATE         CATEGORY             PROMPTS   IMAGES
 TOTAL                                6        24
 ```
 <p align="right">
-  <a href="#top" style="font-weight:bold;text-decoration:none;">
+  <a href="#top" style="text-decoration:none;">
     ⬆️
   </a>
 </p>
 
 ---
 
-# 🌟 Free Providers Included
+# Free Providers Included
 
 AutoVisuals now includes two **completely free** API providers:
 
-## 🦙 Llama (Llama 4 Maverick)
+## Llama (Llama 4 Maverick)
 - No API key required  
 - High performance  
 - Good for bulk generation  
 - Endpoint: https://api.llama-api.com/chat/completions
 
-## 🧠 DeepSeek (DeepSeek V3)
+## DeepSeek (DeepSeek V3)
 - No API key required  
 - Extremely fast  
 - Stable JSON outputs  
 - Endpoint: https://api.deepseek.com/free/chat/completions
 <p align="right">
-  <a href="#top" style="font-weight:bold;text-decoration:none;">
+  <a href="#top" style="text-decoration:none;">
     ⬆️
   </a>
 </p>
 
 ---
 
-# 🧰 Theme List Format
+# Theme List Format
 Each themes and its weights are in the same row, seperated by comma.
 ```
 theme,weight
@@ -277,30 +277,30 @@ sunset over mountains,5
 
 ---
 
-# 🏗 Future Modules
+# Future Modules
    
 - Windows installation  
 - GUI (AutoVisuals Studio)  
 
 ---
 
-# 🤝 Contribution
+# Contribution
 
 Maintained by **Sloths Visuals** of [**Sloths Intel**](https://github.com/slothsintel), and [**@drxilu**](https://github.com/drxilu).
 
 ---
 
-# 📄 License
+# License
 
 MIT License.
 
 ---
 
-# 🦥 About Sloths Visuals
+# About Sloths Visuals
 
 A creative visualisation brand under **Sloths Intel**, specialising in data visulisation and automated illustration pipelines.
 <p align="right">
-  <a href="#top" style="font-weight:bold;text-decoration:none;">
+  <a href="#top" style="text-decoration:none;">
     ⬆️
   </a>
 </p>
