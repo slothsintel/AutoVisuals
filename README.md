@@ -43,21 +43,10 @@
   - **Back to Gallery**
 
 ### 🚀 Full Pipeline Command
-Run
-```
-autovisuals pipeline
-```
-Return:
-```
-generate → send → download → split → gallery
-```
+Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `gallery`.
 
 ### 📊 Status Summary
-Run
-```
-autovisuals status
-```
-Shows how many prompts/images exist per date/category.
+Run `autovisuals status` to show how many prompts/images exist per date/category.
 
 ---
 
@@ -106,85 +95,75 @@ export MJ_CHANNEL_ID="123456789012345678"
 
 ---
 
-Pipeline command: generate → send → download → gallery
+`autovisuals pipeline` command to `generate` → `send` → `download` → `gallery`
+
+Option
 
 ```
-autovisuals pipeline
-```
-option
-
-```
--h, --help          show this help message and exit.
--p, --provider      chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
--l, --list          list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
--m, --mode          mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
--t, --title         title to generate prompts, choose r(weight random) by default or m(manual) input.
--d, --records       number of prompts for each theme and title, 3 by default.
--r, --repeat        number of the same prompt to run in midjourney, 5 by default.
--o, --out           prompt output directory, prompt/<date>/<theme> by default.
--w, --webhook       webhook URL, need to export it as environment variable.
---download-dir      images download directory, mj_downloads/<date>/<theme> by default.
---gallery-out       gallery file output directory, mj_gallery.html by default.
---idle-seconds      downloader idle timeout in seconds to proccess gallery, 180 by default.
+-h, --help         show this help message and exit.
+-p, --provider     chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
+-l, --list         list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
+-m, --mode         mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
+-t, --title        title to generate prompts, choose r(weight random) by default or m(manual) input.
+-d, --records      number of prompts for each theme and title, 3 by default.
+-r, --repeat       number of the same prompt to run in midjourney, 5 by default.
+-o, --out          prompt output directory, prompt/<date>/<theme> by default.
+-w, --webhook      webhook URL, need to export it as environment variable.
+--download-dir     images download directory, mj_downloads/<date>/<theme> by default.
+--gallery-out      gallery file output directory, mj_gallery.html by default.
+--idle-seconds     downloader idle timeout in seconds to proccess gallery, 180 by default.
 ```
 ---
 
-Subcommand to generate prompts + metadata
+Subcommand `autovisuals generate` to generate prompts + metadata
 
+Option
 ```
-autovisuals generate
-```
-option
-```
--h, --help          show this help message and exit.
--p, --provider      chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
--l, --list          list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
--m, --mode          mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
--t, --title         title to generate prompts, choose r(weight random) by default or m(manual) input.
--d, --records       number of prompts for each theme and title, 3 by default.
--r, --repeat        number of the same prompt to run in midjourney, 5 by default.
--o, --out           prompt output directory, prompt/<date>/<theme> by default.       
+-h, --help         show this help message and exit.
+-p, --provider     chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.
+-l, --list         list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
+-m, --mode         mode to generate prompts by themes, choose r(weighted random) by default or m(manual).
+-t, --title        title to generate prompts, choose r(weight random) by default or m(manual) input.
+-d, --records      number of prompts for each theme and title, 3 by default.
+-r, --repeat       number of the same prompt to run in midjourney, 5 by default.
+-o, --out          prompt output directory, prompt/<date>/<theme> by default.       
 ```
 
-Subcommand to send prompts to Discord webhook
+Subcommand `autovisuals discord` to send prompts to Discord webhook
+
+Option
 ```
-autovisuals discord
-```
--h, --help          show this help message and exit.
--o, --out           prompt output directory, prompt/<date>/<theme> by default.
---category          specific category slug to send, true by default.
---all-categories    send prompts for all categories for latest date, true by default.
+-h, --help         show this help message and exit.
+-o, --out          prompt output directory, prompt/<date>/<theme> by default.
+--category         specific category slug to send, true by default.
+--all-categories   send prompts for all categories for latest date, true by default.
 ```
 
-Subcommand to download Midjourney images
+Subcommand `autovisuals download` to download Midjourney images
+
+Option
 ```
-option
-```
--h, --help          show this help message and exit.
--t, --token         discord bot token, need to export it as environment variable.
--c, --channel-id    discord channel id, need to export it as environment variable.
--o, --out OUT       images download directory, mj_downloads/<date>/<theme> by default.
---limit LIMIT       stop after N images, no limit by default.
---idle-seconds      downloader idle timeout in seconds to proccess gallery, 180 by default.       
+-h, --help         show this help message and exit.
+-t, --token        discord bot token, need to export it as environment variable.
+-c, --channel-id   discord channel id, need to export it as environment variable.
+-o, --out OUT      images download directory, mj_downloads/<date>/<theme> by default.
+--limit LIMIT      stop after N images, no limit by default.
+--idle-seconds     downloader idle timeout in seconds to proccess gallery, 180 by default.       
 ```
 
-Subcommand to build HTML gallery
+Subcommand `autovisuals gallery` to build HTML gallery
+
+Option
 ```
-autovisuals gallery           
-```
-option
-```
--h, --help          show this help message and exit.
---download-dir      images download directory, mj_downloads/<date>/<theme> by default.
---prompt-dir        prompt output directory, prompt/<date>/<theme> by default.   
---out OUT           gallery file output directory, mj_gallery.html by default.     
+-h, --help         show this help message and exit.
+--download-dir     images download directory, mj_downloads/<date>/<theme> by default.
+--prompt-dir       prompt output directory, prompt/<date>/<theme> by default.   
+--out OUT          gallery file output directory, mj_gallery.html by default.     
 ```
 
-Additional command to Show a tidy summary of prompts + images per date/theme
-```
-autovisuals status            
-```
-example
+Additional command `autovisuals status ` to Show a tidy summary of prompts + images per date/theme
+
+Example
 ```
 DATE         CATEGORY             PROMPTS   IMAGES
 2025-11-21   business                  3        12
