@@ -1,7 +1,7 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine
 
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="50" />
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="500" />
 
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 
