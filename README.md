@@ -1,17 +1,20 @@
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine  
-[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
-[![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
-[![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
-[![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
-<div align="center">
-<img src="docs/autovisuals_hex_icon_simple.svg" width="180" alt="AutoVisuals logo" />
-</div>
 
-<div align="center">
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
+
+[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
+
+[![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
+
+[![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
+
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
+
+[![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
+
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="250" />
 
 **AutoVisuals** designed by **Sloths Visuals (SlothsIntel)**, is a fully automated pipeline for generating **Midjourney-ready prompts**, sending them to **Discord**, automatically **downloading and splitting MJ images**, and building a beautiful **HTML gallery** with zoom navigation, for business design, internal datasets, Adobe Stock, or other illustration stocks.
 
