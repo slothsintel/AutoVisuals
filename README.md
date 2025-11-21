@@ -56,8 +56,12 @@
   - **Prev/Next navigation**.
   - **Back to Gallery**.
 
+## Scale Process
+
+*WIP*
+
 ## 🚀 Full Pipeline Command
-Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `gallery`.
+Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `gallery` → `scale`(if dependencie installed).
 
 ## 📊 Status Summary
 Run `autovisuals status` to show how many prompts/images exist per date/category.
@@ -68,7 +72,11 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 
 ## From pip
 
+*WIP*
+
 ## From conda
+
+*WIP*
 
 ## From source (advanced)
 
@@ -110,13 +118,16 @@ export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
 ```
 
+For scaling(optional):
+
+*WIP*
 ---
 
 # 🧠 Usage
 
 ## Pipeline
 
-Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery`.
+Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery` → `scale`(if dependencie installed).
 
 Option
 
@@ -183,6 +194,13 @@ Option
 --out OUT         gallery file output directory, mj_gallery.html by default.
 ```
 
+Subcommand `autovisuals scale` to scale downloaded images to upload to stock (optional)
+
+Option
+```
+*WIP*
+```
+
 Additional command `autovisuals status` to Show a tidy summary of prompts + images per date/theme
 
 Example
@@ -228,7 +246,7 @@ sunset over mountains,5
 
 # 🏗 Future Modules
    
-- Illustration Scaling  
+- Windows installation  
 - GUI (AutoVisuals Studio)  
 
 ---
