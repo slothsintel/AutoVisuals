@@ -1,4 +1,4 @@
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="-50" />
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="-500" />
 
 # 🦥 AutoVisuals  
 ### Automated Illustration & Prompt Generation Engine  
@@ -25,13 +25,13 @@
 # 📊 Contents
 - [Features](#Features)
 - [Installation](#Installation)
---  [From pip](#From-pip)
---  [From conda](#From-conda)
---  [From source(advanced)](#From-source(advanced))
+  - [From pip](#From-pip)
+  - [From conda](#From-conda)
+  - [From source(advanced)](#From-source-advanced))
 - [Required Environment Variables](#RequiredEnvironment-Variables)
 - [Usage](#Usage)
---  [Pipeline](#Pipeline)
---  [Subcommand](#Subcommand)
+  - [Pipeline](#Pipeline)
+  - [Subcommand](#Subcommand)
 - [Free Providers Included](#Free-Providers-Included)
 - [Theme List Format](#Theme-List-Format)
 - [Future Modules](#Future-Modules)
@@ -43,27 +43,27 @@
 
 # ⭐ Features
 
-### 🔮 Prompt & Metadata Generator
+## 🔮 Prompt & Metadata Generator
 - Generates output: **category**, **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
-- Supports output formats: **txt**, **csv**, and **json**
+- Supports output formats: **txt**, **csv**, and **json**.
 
-### 🤖 Discord Automation
+## 🤖 Discord Automation
 - Sends each prompt line to any Discord channel via **webhook**.
 - Confirms each prompt in your private server with [one click]().
 - Downloads MJ bot images via **Discord bot token**.
 - Auto-splits 2×2 grids into 4 tiles.
 
-### 🖼️ HTML Gallery Builder
+## 🖼️ HTML Gallery Builder
 - Builds a techno-tidy responsive gallery:
   - Date → Category → Images  
 - Zoom mode includes:
-  - **Prev/Next navigation**  
-  - **Back to Gallery**
+  - **Prev/Next navigation**.
+  - **Back to Gallery**.
 
-### 🚀 Full Pipeline Command
+## 🚀 Full Pipeline Command
 Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `gallery`.
 
-### 📊 Status Summary
+## 📊 Status Summary
 Run `autovisuals status` to show how many prompts/images exist per date/category.
 
 ---
@@ -76,18 +76,18 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 
 ## From source (advanced)
 
-####  Clone the repository
+Clone the repository.
 ```bash
 git clone https://github.com/slothsintel/AutoVisuals
 cd AutoVisuals
 ```
 
-#### Install environment
+Install environment.
 ```bash
 pip install -r requirements.txt
 ```
 
-#### Add to PATH
+Add to PATH.
 ```bash
 echo 'export PATH="$HOME/AutoVisuals/scripts:$PATH"' >> ~/.bashrc
 source ~/.bashrc
@@ -97,17 +97,17 @@ source ~/.bashrc
 
 # 🔐 Required Environment Variables
 
-#### For prompt generation, where to get [openai api]():
+For prompt generation, where to get [openai api]():
 ```
 export API_KEY="your LLM API key"
 ```
 
-#### For Discord prompt sending, where to get [discord webhook]():
+For Discord prompt sending, where to get [discord webhook]():
 ```
 export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
-#### For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
+For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
 ```
 export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
@@ -117,9 +117,9 @@ export MJ_CHANNEL_ID="123456789012345678"
 
 # 🧠 Usage
 
-### Pipeline
+## Pipeline
 
-Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery`
+Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery`.
 
 Option
 
@@ -139,9 +139,9 @@ Option
 ```
 ---
 
-### Subcommand
+## Subcommand
 
-Subcommand `autovisuals generate` to generate prompts + metadata
+Subcommand `autovisuals generate` to generate prompts + metadata.
 
 Option
 ```
