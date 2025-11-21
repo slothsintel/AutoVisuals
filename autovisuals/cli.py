@@ -85,18 +85,61 @@ def build_parser() -> argparse.ArgumentParser:
 
     # generate
     gen = subparsers.add_parser("generate", help="Generate prompts + metadata.")
-    gen.add_argument("-p", "--provider", default="openai", help="chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.")
-    gen.add_argument("-l", "--list", default=DEFAULT_THEME_CSV, help="list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.")
-    gen.add_argument("-m", "--mode", default="r", help="mode to generate prompts by themes, choose r(weighted random) by default or m(manual).")
-    gen.add_argument("-t", "--title", default="r", help="title mode to generate titles for prompts, choose r(weighted random) by default or m(manual).")
-    gen.add_argument("-d", "--records", type=int, default=3, help="number of prompts for each theme and title, 3 by default.")
-    gen.add_argument("-r", "--repeat", type=int, default=5, help="number of times to repeat each prompt for diversity, 5 by default.")
-    gen.add_argument("-o", "--out", default=DEFAULT_OUT_PROMPT, help="prompt output directory, prompt/<date>/<theme> by default.")
+    gen.add_argument(
+        "-p",
+        "--provider",
+        default="openai",
+        help="chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.",
+    )
+    gen.add_argument(
+        "-l",
+        "--list",
+        default=DEFAULT_THEME_CSV,
+        help="list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.",
+    )
+    gen.add_argument(
+        "-m",
+        "--mode",
+        default="r",
+        help="mode to generate prompts by themes, choose r(weighted random) by default or m(manual).",
+    )
+    gen.add_argument(
+        "-t",
+        "--title",
+        default="r",
+        help="title mode to generate titles for prompts, choose r(weighted random) by default or m(manual).",
+    )
+    gen.add_argument(
+        "-d",
+        "--records",
+        type=int,
+        default=3,
+        help="number of prompts for each theme and title, 3 by default.",
+    )
+    gen.add_argument(
+        "-r",
+        "--repeat",
+        type=int,
+        default=5,
+        help="number of times to repeat each prompt for diversity, 5 by default.",
+    )
+    gen.add_argument(
+        "-o",
+        "--out",
+        default=DEFAULT_OUT_PROMPT,
+        help="prompt output directory, prompt/<date>/<theme> by default.",
+    )
 
     # discord
     dis = subparsers.add_parser("discord", help="Send prompts to Discord webhook.")
-    dis.add_argument("-w", "--webhook", help="webhook URL, need to export it as environment variable.")
-    dis.add_argument("--category", help="specific category slug to send, true by default.")
+    dis.add_argument(
+        "-w",
+        "--webhook",
+        help="webhook URL, need to export it as environment variable.",
+    )
+    dis.add_argument(
+        "--category", help="specific category slug to send, true by default."
+    )
     dis.add_argument(
         "--all-categories",
         action="store_true",
@@ -105,9 +148,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     # download
     dl = subparsers.add_parser("download", help="Download Midjourney images.")
-    dl.add_argument("-t", "--token", help="discord bot token, need to export it as environment variable.")
     dl.add_argument(
-        "-c", "--channel-id", type=int, help="discord channel id, need to export it as environment variable."
+        "-t",
+        "--token",
+        help="discord bot token, need to export it as environment variable.",
+    )
+    dl.add_argument(
+        "-c",
+        "--channel-id",
+        type=int,
+        help="discord channel id, need to export it as environment variable.",
     )
     dl.add_argument(
         "-o",
@@ -153,12 +203,44 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # generation
-    pipe.add_argument("-p", "--provider", default="openai", help="chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.")
-    pipe.add_argument("-l", "--list", default=DEFAULT_THEME_CSV, help="list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.")
-    pipe.add_argument("-m", "--mode", default="r", help="mode to generate prompts by themes, choose r(weighted random) by default or m(manual).")
-    pipe.add_argument("-t", "--title", default="r", help="title mode to generate titles for prompts, choose r(weighted random) by default or m(manual).")
-    pipe.add_argument("-d", "--records", type=int, default=3, help="number of prompts for each theme and title, 3 by default.")
-    pipe.add_argument("-r", "--repeat", type=int, default=5, help="number of times to repeat each prompt for diversity, 5 by default.")
+    pipe.add_argument(
+        "-p",
+        "--provider",
+        default="openai",
+        help="chatbot provider, choose openai by default, anthropic, gemini, llama, or deepseek.",
+    )
+    pipe.add_argument(
+        "-l",
+        "--list",
+        default=DEFAULT_THEME_CSV,
+        help="list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.",
+    )
+    pipe.add_argument(
+        "-m",
+        "--mode",
+        default="r",
+        help="mode to generate prompts by themes, choose r(weighted random) by default or m(manual).",
+    )
+    pipe.add_argument(
+        "-t",
+        "--title",
+        default="r",
+        help="title mode to generate titles for prompts, choose r(weighted random) by default or m(manual).",
+    )
+    pipe.add_argument(
+        "-d",
+        "--records",
+        type=int,
+        default=3,
+        help="number of prompts for each theme and title, 3 by default.",
+    )
+    pipe.add_argument(
+        "-r",
+        "--repeat",
+        type=int,
+        default=5,
+        help="number of times to repeat each prompt for diversity, 5 by default.",
+    )
     pipe.add_argument(
         "-o",
         "--out",
@@ -167,7 +249,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # discord
-    pipe.add_argument("-w", "--webhook", help="webhook URL, need to export it as environment variable.")
+    pipe.add_argument(
+        "-w",
+        "--webhook",
+        help="webhook URL, need to export it as environment variable.",
+    )
 
     # download + gallery
     pipe.add_argument(
