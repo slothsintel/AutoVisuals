@@ -1,7 +1,8 @@
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="-500" />
-
 # 🦥 AutoVisuals  
-### Automated Illustration & Prompt Generation Engine  
+### Automated Illustration & Prompt Generation Engine
+
+<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="0" />
+
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
@@ -27,7 +28,7 @@
 - [Installation](#Installation)
   - [From pip](#From-pip)
   - [From conda](#From-conda)
-  - [From source(advanced)](#From-source-advanced))
+  - [From source(advanced)](#From-source-advanced)
 - [Required Environment Variables](#RequiredEnvironment-Variables)
 - [Usage](#Usage)
   - [Pipeline](#Pipeline)
@@ -137,7 +138,6 @@ Option
 --gallery-out     gallery file output directory, mj_gallery.html by default.
 --idle-seconds    downloader idle timeout in seconds to proccess gallery, 180 by default.
 ```
----
 
 ## Subcommand
 
