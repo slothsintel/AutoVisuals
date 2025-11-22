@@ -216,7 +216,8 @@ rules:
 - prompt:
     - detailed midjourney content to append after '/imagine prompt:'
     - DO NOT include '/imagine prompt:' — only the content itself
-    - include subject, environment, composition, style, lighting, mood, camera hints
+    - include simple subject, environment, movement, not too complicated composition, simple style, lighting, positive mood, camera hints
+    - DO NOT include people from the front view or many details for example fingers and teeth 
     - must end with: --ar 16:9 --s 20 --c 10 --raw --r {repeat}
 - title:
     - stock-photo friendly
