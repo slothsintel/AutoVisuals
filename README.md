@@ -160,8 +160,8 @@ Option:
 -l, --list        list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
 -m, --mode        mode to generate prompts by themes, choose r(random) by default or m(manual).
 -t, --title       title to generate prompts, choose r(weight random) by default or m(manual) input.
--d, --records     number of prompts for each theme and title, 3 by default.
--r, --repeat      number of times to repeat each prompt for diversity, 5 by default.
+-d, --records     number of prompts for each theme and title, 5 by default.
+-r, --repeat      number of times to repeat each prompt for diversity, 2 by default.
 -o, --out         prompt output directory, prompt/<date>/<theme> by default.
 -w, --webhook     webhook URL, need to export it as environment variable.
 --download-dir    images download directory, mj_downloads/<date>/<theme> by default.
@@ -180,8 +180,8 @@ Option:
 -l, --list        list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
 -m, --mode        mode to generate prompts by themes, choose r(random) by default or m(manual).
 -t, --title       title to generate prompts, choose r(weight random) by default or m(manual) input.
--d, --records     number of prompts for each theme and title, 3 by default.
--r, --repeat      number of times to repeat each prompt for diversity, 5 by default.
+-d, --records     number of prompts for each theme and title, 5 by default.
+-r, --repeat      number of times to repeat each prompt for diversity, 2 by default.
 -o, --out         prompt output directory, prompt/<date>/<theme> by default.
 ```
 
