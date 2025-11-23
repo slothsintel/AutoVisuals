@@ -80,9 +80,25 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 
 ## From pip
 
+First,
+
+```shell
+conda create -n autovisuals python>=3.14
+conda activate autovisuals
+cd <your_work_directory>
+```
+
 *WIP*
 
 ## From conda
+
+Similarly,
+
+```shell
+conda create -n autovisuals python>=3.14
+conda activate autovisuals
+cd <your_work_directory>
+```
 
 *WIP*
 
