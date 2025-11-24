@@ -7,7 +7,7 @@
 
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
-[![Python](https://img.shields.io/badge/Python-3.14+-blue.svg)]()
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)]()
 [![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
 
 [![Static Badge](https://img.shields.io/badge/Sloths%20Visuals-Powered-%23f378d0)]()
@@ -83,7 +83,7 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 First,
 
 ```shell
-conda create -n autovisuals python>=3.14
+conda create -n autovisuals python>=3.11
 conda activate autovisuals
 cd <your_work_directory>
 ```
@@ -95,7 +95,7 @@ cd <your_work_directory>
 Similarly,
 
 ```shell
-conda create -n autovisuals python>=3.14
+conda create -n autovisuals python>=3.11
 conda activate autovisuals
 cd <your_work_directory>
 ```
