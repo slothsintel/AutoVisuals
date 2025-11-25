@@ -5,9 +5,9 @@ Downloads MJ images, splits grids, and maps them into:
 
     PROJECT_ROOT/mj_downloads/YYYY-MM-DD/<category>/
 
-Category is resolved via [av:xxxx] ID tags from prompt metadata.
-All tunable parameters (idle timeout, limits, paths) are passed in
-from autovisuals.cli for tidiness.
+Category (and title-based filename) is resolved via [av:xxxx] ID tags from
+prompt metadata. All tunable parameters (idle timeout, limits, paths) are
+passed in from autovisuals.cli for tidiness.
 """
 
 import logging
@@ -95,14 +95,24 @@ def split_grid_image(path: Path, delete_original: bool = True):
             logging.warning("  ↳ failed to delete original grid %s: %s", path, e)
 
 
-def build_id_to_category_map(prompt_root: Path, date_str: str) -> Dict[str, str]:
+def build_id_to_info_map(prompt_root: Path, date_str: str) -> Dict[str, Dict[str, str]]:
     """
-    Map short IDs → category slugs for a given date based on:
+    Map short IDs → info dict for a given date based on:
 
         prompt_root/DATE/<category>/meta.json
+
+    Returned mapping:
+        {
+          "abcd": {
+            "category": "business",
+            "title": "Golden Sunrise Over Misty Mountains",
+            "title_slug": "golden_sunrise_over_misty_mountains"
+          },
+          ...
+        }
     """
     date_dir = prompt_root / date_str
-    mapping: Dict[str, str] = {}
+    mapping: Dict[str, Dict[str, str]] = {}
     if not date_dir.exists():
         return mapping
 
@@ -124,8 +134,23 @@ def build_id_to_category_map(prompt_root: Path, date_str: str) -> Dict[str, str]
             if not isinstance(rec, dict):
                 continue
             uid = rec.get("id")
-            if uid:
-                mapping[str(uid).lower()] = cat_dir.name
+            if not uid:
+                continue
+            uid = str(uid).lower()
+
+            # title from meta.json (fallback to category name)
+            title = str(rec.get("title", "")).strip() or cat_dir.name
+
+            # safe slug for filenames
+            title_slug = re.sub(r"[^a-zA-Z0-9\-]+", "_", title).strip("_")
+            if not title_slug:
+                title_slug = cat_dir.name
+
+            mapping[uid] = {
+                "category": cat_dir.name,
+                "title": title,
+                "title_slug": title_slug,
+            }
 
     return mapping
 
@@ -156,7 +181,8 @@ class MJDownloader(discord.Client):
         self.last_download_time: Optional[datetime] = None
 
         self.prompt_root = PROJECT_ROOT / "prompt"
-        self._id_map_cache: Dict[str, Dict[str, str]] = {}
+        # cache: date_str -> { uid -> {category,title,title_slug} }
+        self._id_map_cache: Dict[str, Dict[str, Dict[str, str]]] = {}
 
     async def on_ready(self):
         logging.info("Logged in as %s", self.user)
@@ -189,9 +215,9 @@ class MJDownloader(discord.Client):
                 await self.close()
                 break
 
-    def _load_id_map(self, date_str: str) -> Dict[str, str]:
+    def _load_id_map(self, date_str: str) -> Dict[str, Dict[str, str]]:
         if date_str not in self._id_map_cache:
-            self._id_map_cache[date_str] = build_id_to_category_map(
+            self._id_map_cache[date_str] = build_id_to_info_map(
                 self.prompt_root, date_str
             )
         return self._id_map_cache[date_str]
@@ -210,14 +236,23 @@ class MJDownloader(discord.Client):
         date_str = created.date().isoformat()
         content = message.content or ""
 
-        # map [av:xxxx] → category
+        # map [av:xxxx] → (category, title, title_slug)
         id_map = self._load_id_map(date_str)
         m = re.search(r"\[av:([0-9a-fA-F]{4,})\]", content)
         uid = m.group(1).lower() if m else None
 
+        title_slug: Optional[str] = None
+
         if uid and uid in id_map:
-            cat = id_map[uid]
-            logging.info("Matched id=%s → category=%s", uid, cat)
+            info = id_map[uid]
+            cat = info["category"]
+            title_slug = info["title_slug"]
+            logging.info(
+                "Matched id=%s → category=%s title=%s",
+                uid,
+                cat,
+                info["title"],
+            )
         else:
             cat = slug_from_content(content)
             logging.info("Fallback category=%s", cat)
@@ -235,7 +270,12 @@ class MJDownloader(discord.Client):
             idx = self.downloaded_count
 
             ext = Path(att.filename).suffix or ".png"
-            out_path = cat_dir / f"{cat}_{idx:04d}{ext}"
+
+            # base name: use title slug when we have it, otherwise category
+            base_stem = title_slug or cat
+            base_stem = re.sub(r"[^a-zA-Z0-9\-]+", "_", base_stem).strip("_") or cat
+
+            out_path = cat_dir / f"{base_stem}_{idx:04d}{ext}"
 
             logging.info("[#%d] Downloading %s → %s", idx, att.filename, out_path)
             data = await att.read()

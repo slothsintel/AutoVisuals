@@ -212,14 +212,16 @@ you must return valid json:
 
 rules:
 - category: broad stock-photo category that fits the theme (e.g. nature, business, people)
-- theme: keep or lightly refine the given theme text
 - prompt:
     - detailed midjourney content to append after '/imagine prompt:'
-    - DO NOT include '/imagine prompt:' — only the content itself
+    - each prompt should be stylistically different
     - include simple subject, environment, movement, not too complicated composition, simple style, lighting, positive mood, camera hints
-    - DO NOT include recognised people, celebrities, or to many details for example fingers and teeth
-    - each prompt should vary from each other 
-    - must end with: --ar 16:9 --s 20 --c 10 --raw --r {repeat}
+    - Use rich sensory detail (sight, environment, texture, atmosphere)
+    - Use distinct art styles (concept art, cinema still, macro photography, tilt-shift, watercolor, cyberpunk render, claymation, brutalist architecture…)
+    - DO NOT include '/imagine prompt:' — only the content itself
+    - DO NOT include people's face, copyrighted characters, characters, or too many details for example fingers and teeth
+    - Prompts must avoid repetition in: structure,artistic style,theme, camera usage, lighting setup, mood
+    - must end with: --v 7 --ar 16:9 --s 20 --c 40 --raw --r {repeat}
 - title:
     - stock-photo friendly
     - <= 60 characters

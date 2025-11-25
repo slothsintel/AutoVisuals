@@ -58,7 +58,8 @@ def build_gallery(
     # by_date[date][category] = [image paths]
     by_date: dict[str, dict[str, list[Path]]] = {}
 
-    for day_dir in sorted(download_root.iterdir()):
+    # Newest dates first
+    for day_dir in sorted(download_root.iterdir(), reverse=True):
         if not day_dir.is_dir():
             continue
         date_str = day_dir.name
@@ -66,9 +67,14 @@ def build_gallery(
             if not cat_dir.is_dir():
                 continue
             slug = cat_dir.name
+            # Newest images first inside each category
             imgs = [
                 p
-                for p in sorted(cat_dir.iterdir())
+                for p in sorted(
+                    cat_dir.iterdir(),
+                    key=lambda x: x.stat().st_mtime,
+                    reverse=True,
+                )
                 if p.is_file()
                 and p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
             ]
@@ -160,7 +166,8 @@ p.meta {
     parts.append(f"<h1>{escape(title)}</h1>")
     parts.append(f"<p class='meta'>Generated at {escape(now)}</p>")
 
-    for date_str, categories in sorted(by_date.items()):
+    # Newest dates (keys) first in output as well
+    for date_str, categories in sorted(by_date.items(), reverse=True):
         parts.append("<section class='section-day'>")
         parts.append(f"<h2>{escape(date_str)}</h2>")
 

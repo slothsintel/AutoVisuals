@@ -83,7 +83,7 @@ Run `autovisuals status` to show how many prompts/images exist per date/category
 First,
 
 ```shell
-conda create -n autovisuals python>=3.11
+conda create -n autovisuals python==3.11
 conda activate autovisuals
 cd <your_work_directory>
 ```
@@ -95,7 +95,7 @@ cd <your_work_directory>
 Similarly,
 
 ```shell
-conda create -n autovisuals python>=3.11
+conda create -n autovisuals python==3.11
 conda activate autovisuals
 cd <your_work_directory>
 ```
@@ -145,7 +145,7 @@ For Discord prompt sending, where to get [discord webhook]():
 export WEBHOOK_URL="https://discord.com/api/webhooks/..."
 ```
 
-For Discord image downloading, where to get[discord bot token]() and [mj channel id]():
+For Discord image downloading, where to get [discord bot token]() and [mj channel id]():
 ```shell
 export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
@@ -176,13 +176,13 @@ Option:
 -l, --list        list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
 -m, --mode        mode to generate prompts by themes, choose r(random) by default or m(manual).
 -t, --title       title to generate prompts, choose r(weight random) by default or m(manual) input.
--d, --records     number of prompts for each theme and title, 5 by default.
+-d, --records     number of prompts for each run, 5 by default.
 -r, --repeat      number of times to repeat each prompt for diversity, 2 by default.
 -o, --out         prompt output directory, prompt/<date>/<theme> by default.
 -w, --webhook     webhook URL, need to export it as environment variable.
 --download-dir    images download directory, mj_downloads/<date>/<theme> by default.
 --gallery-out     gallery file output directory, mj_gallery.html by default.
---idle-seconds    downloader idle timeout in seconds to proccess gallery, 180 by default.
+--idle-seconds    downloader idle timeout in seconds to proccess gallery, 120 by default.
 ```
 
 ## Subcommand
@@ -196,7 +196,7 @@ Option:
 -l, --list        list of visuals list, choose autovisuals/data/adobe_cat.csv by default or others.
 -m, --mode        mode to generate prompts by themes, choose r(random) by default or m(manual).
 -t, --title       title to generate prompts, choose r(weight random) by default or m(manual) input.
--d, --records     number of prompts for each theme and title, 5 by default.
+-d, --records     number of prompts for each run, 5 by default.
 -r, --repeat      number of times to repeat each prompt for diversity, 2 by default.
 -o, --out         prompt output directory, prompt/<date>/<theme> by default.
 ```
@@ -220,7 +220,7 @@ Option:
 -c, --channel-id  discord channel id, need to export it as environment variable.
 -o, --out OUT     images download directory, mj_downloads/<date>/<theme> by default.
 --limit LIMIT     stop after N images, no limit by default.
---idle-seconds    downloader idle timeout in seconds to proccess gallery, 180 by default.
+--idle-seconds    downloader idle timeout in seconds to proccess gallery, 120 by default.
 ```
 
 Subcommand `autovisuals gallery` to build HTML gallery.

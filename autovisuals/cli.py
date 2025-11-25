@@ -14,8 +14,10 @@ the helper modules stay simple.
 """
 
 import os
+import time
 import argparse
 from pathlib import Path
+
 
 from .get_mj_prompt import main as generate_main
 from .send_to_discord import (
@@ -29,12 +31,12 @@ from .gallery import build_gallery
 
 
 PROJECT_ROOT = _get_project_root()
-
+DEFAULT_EXPORT_DIR = "/mnt/c/Users/xilu/Downloads/autovisuals_export"
 DEFAULT_THEME_CSV = "adobe_cat.csv"
 DEFAULT_OUT_PROMPT = "prompt"
 DEFAULT_DOWNLOAD_DIR = "mj_downloads"
 DEFAULT_GALLERY_HTML = "mj_gallery.html"
-DEFAULT_IDLE_SECONDS = 180  # 3 minutes default idle timeout
+DEFAULT_IDLE_SECONDS = 120  # 2 minutes default idle timeout
 
 
 # ------------------------------------------------------------------
@@ -272,6 +274,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_IDLE_SECONDS,
         help=f"downloader idle timeout in seconds to proccess gallery, {DEFAULT_IDLE_SECONDS} by default.",
     )
+    pipe.add_argument(
+        "-U",
+        "--upscale",
+        choices=["n", "y"],
+        default="n",
+        help="optional upscaling step after download (y = RealESRGAN, default: n).",
+    )
+    pipe.add_argument(
+        "--export-dir",
+        default=DEFAULT_EXPORT_DIR,
+        help="export root for upscaled images (absolute path, "
+             "e.g. /mnt/c/Users/xilu/Downloads/autovisuals_export).",
+    )
 
     # status
     status = subparsers.add_parser(
@@ -440,6 +455,9 @@ def main():
         print(f"Gallery written to: {out}")
 
     elif args.command == "pipeline":
+        # record start time so we can detect "new" prompts + downloads
+        pipeline_start = time.time()
+
         # 1. generate
         print("Step 1/4: Generating prompts + metadata...")
         generate_main(
@@ -452,7 +470,7 @@ def main():
             out_arg=args.out,
         )
 
-        # 2. send to discord
+        # 2. send to discord – ONLY most recent new prompts (by mtime)
         print("\nStep 2/4: Sending prompts to Discord...")
         webhook = args.webhook or os.environ.get("WEBHOOK_URL")
         if not webhook:
@@ -463,11 +481,27 @@ def main():
         if not cats:
             raise RuntimeError(f"No categories found under prompt/{latest_date}/")
 
-        print(f"Using date: {latest_date}")
-        print(f"Categories: {cats}")
+        print(f"Using date        : {latest_date}")
+        print(f"All categories    : {cats}")
+
+        # find categories whose prompt.txt was modified in THIS run
+        prompt_root = get_prompt_root() / latest_date
+        new_cats: list[str] = []
+        for cat in cats:
+            pf = prompt_root / cat / "prompt.txt"
+            if pf.exists():
+                mtime = pf.stat().st_mtime
+                if mtime >= pipeline_start:
+                    new_cats.append(cat)
+
+        if not new_cats:
+            # fallback: treat the latest category as "most recent"
+            new_cats = [cats[-1]]
+
+        print(f"New categories to send (most recent): {new_cats}")
 
         total_prompts = 0
-        for cat in cats:
+        for cat in new_cats:
             pf = get_prompt_file_for(latest_date, cat)
             print(f"→ sending {cat}")
             for line in pf.read_text(encoding="utf-8").splitlines():
@@ -482,7 +516,7 @@ def main():
             print("No prompts, aborting pipeline after step 2.")
             return
 
-        # 3. download
+        # 3. download – MJ → mj_downloads
         print("\nStep 3/4: Downloading images from Discord...")
         print(
             f"Downloader will auto-stop after {args.idle_seconds}s of inactivity "
@@ -499,14 +533,73 @@ def main():
             idle_seconds=idle,
         )
 
+        # 3b. OPTIONAL upscaling – ONLY most recent generated downloads
+        final_download_root = args.download_dir  # default: original downloads
+
+        # if you already added --upscale / --export-dir, keep this guard;
+        # otherwise you can remove the 'getattr' and condition.
+        if getattr(args, "upscale", "n") == "y":
+            print("\nStep 3b: Upscaling images with RealESRGAN (most recent only)...")
+
+            from .upscale import run_realesrgan
+
+            raw_root = Path(args.download_dir)
+            if not raw_root.is_absolute():
+                raw_root = PROJECT_ROOT / raw_root
+
+            export_root = Path(
+                getattr(args, "export_dir", "/mnt/c/Users/xilu/Downloads/autovisuals_export")
+            )
+            export_root.mkdir(parents=True, exist_ok=True)
+
+            img_exts = {".png", ".jpg", ".jpeg", ".webp"}
+
+            date_export_dir = export_root / latest_date
+            date_export_dir.mkdir(parents=True, exist_ok=True)
+
+            new_images: list[Path] = []
+
+            # only scan categories whose prompts we just sent
+            for cat in new_cats:
+                src_cat_dir = raw_root / latest_date / cat
+                if not src_cat_dir.exists():
+                    continue
+
+                for p in src_cat_dir.iterdir():
+                    if not (p.is_file() and p.suffix.lower() in img_exts):
+                        continue
+                    if p.stat().st_mtime >= pipeline_start:
+                        new_images.append((cat, p))
+
+            if not new_images:
+                print("[upscale] no new images found for this run; skipping upscaling.")
+            else:
+                # group by category, so export structure stays date/category/...
+                by_cat: dict[str, list[Path]] = {}
+                for cat, img in new_images:
+                    by_cat.setdefault(cat, []).append(img)
+
+                for cat, imgs in by_cat.items():
+                    out_cat_dir = (date_export_dir / cat)
+                    out_cat_dir.mkdir(parents=True, exist_ok=True)
+                    print(f"[upscale] category {cat}: {len(imgs)} new image(s)")
+                    run_realesrgan(
+                        input_images=imgs,
+                        output_dir=out_cat_dir,
+                    )
+
+                # gallery should use the export folder when upscaling is enabled
+                final_download_root = export_root
+
         # 4. gallery
         print("\nStep 4/4: Building gallery...")
         gallery_path = build_gallery(
-            download_root=args.download_dir,
+            download_root=final_download_root,
             prompt_root=args.out,
             out_file=args.gallery_out,
         )
         print(f"Pipeline complete. Gallery written to: {gallery_path}")
+
 
     elif args.command == "status":
         run_status(
