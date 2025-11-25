@@ -27,6 +27,9 @@
   - [From conda](#From-conda)
   - [From source(advanced)](#From-source-advanced)
 - [Required Environment Variables](#RequiredEnvironment-Variables)
+- [Optional Scaling Modules](#Optional_Scaling_Modules)
+  - [Install Real-ESRGAN](#Install_Real-ESRGAN)
+  - [Install SwinIR](#Install_SwinIR)
 - [Usage](#Usage)
   - [Pipeline](#Pipeline)
   - [Subcommand](#Subcommand)
@@ -151,7 +154,7 @@ export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
 ```
 
-For scaling(optional):
+Optional Scaling Module:
 
 ## Install Real-ESRGAN
 
@@ -168,7 +171,7 @@ python setup.py develop
 ```
 
 
-*WIP Install SwinIR*
+## Install SwinIR*
 
 <p align="right">
   <a href="#top" style="text-decoration:none;">
