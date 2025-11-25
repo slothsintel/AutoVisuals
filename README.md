@@ -42,7 +42,7 @@
 # Features
 
 ## Prompt & Metadata Generator
-- Generates output: **category**, **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
+- Generates output: **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
 - Supports output formats: **txt**, **csv**, and **json**.
 
 ## Discord Automation
@@ -51,6 +51,10 @@
 - Downloads MJ bot images via **Discord bot token**.
 - Auto-splits 2×2 grids into 4 tiles.
 
+## Scaling Processor (optional)
+
+*WIP*
+
 ## HTML Gallery Builder
 - Builds a techno-tidy responsive gallery:
   - Date → Category → Images  
@@ -58,12 +62,8 @@
   - **Prev/Next navigation**.
   - **Back to Gallery**.
 
-## Scaling Processor (optional)
-
-*WIP*
-
 ## Full Pipeline Command
-Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `gallery` → `scale`(if dependencie installed).
+Run `autovisuals pipeline` to get a pipeline of `generate` → `send` → `download` → `split` → `scale`(optional) → `gallery`.
 
 ## Status Summary
 Run `autovisuals status` to show how many prompts/images exist per date/category.
@@ -153,7 +153,23 @@ export MJ_CHANNEL_ID="123456789012345678"
 
 For scaling(optional):
 
-*WIP*
+## Install Real-ESRGAN
+
+Follow [this](https://github.com/slothsintel/Real-ESRGAN) or original [instruction](https://github.com/xinntao/Real-ESRGAN) to install Real-ESRGAN. Quick install:
+```shell
+cd AutoVisuals
+git clone https://github.com/slothsintel/real_esrgan.git
+cd Real-ESRGAN
+pip install basicsr
+pip install facexlib
+pip install gfpgan
+pip install -r requirements.txt
+python setup.py develop
+```
+
+
+*WIP Install SwinIR*
+
 <p align="right">
   <a href="#top" style="text-decoration:none;">
     ⬆️
@@ -166,7 +182,7 @@ For scaling(optional):
 
 ## Pipeline
 
-Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `gallery` → `scale`(if dependencie installed).
+Pipeline command `autovisuals pipeline` to `generate` → `send` → `download` → `scale`(optional) → `gallery`.
 
 Option:
 
@@ -183,6 +199,9 @@ Option:
 --download-dir    images download directory, mj_downloads/<date>/<theme> by default.
 --gallery-out     gallery file output directory, mj_gallery.html by default.
 --idle-seconds    downloader idle timeout in seconds to proccess gallery, 120 by default.
+-U, --upscale     optional upscaling step after download (y = RealESRGAN, default: n)..
+--export-dir      export root for upscaled images (absolute path,
+                  e.g. /mnt/c/Users/xilu/Downloads/autovisuals_export).
 ```
 
 ## Subcommand
@@ -231,13 +250,6 @@ Option:
 --download-dir    images download directory, mj_downloads/<date>/<theme> by default.
 --prompt-dir      prompt output directory, prompt/<date>/<theme> by default.
 --out OUT         gallery file output directory, mj_gallery.html by default.
-```
-
-Subcommand `autovisuals scale` to scale downloaded images to upload to stock (optional).
-
-Option:
-```
-*WIP*
 ```
 
 Additional command `autovisuals status` to Show a tidy summary of prompts + images per date/theme.

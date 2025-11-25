@@ -1,21 +1,33 @@
 """
 AutoVisuals gallery builder.
 
-Scans:
+Scans a download root like:
 
-    PROJECT_ROOT/mj_downloads/
-    PROJECT_ROOT/prompt/
+    <download_root>/
+        YYYY-MM-DD/
+            <category>/
+                *.png / *.jpg / *.jpeg / *.webp
 
-and produces:
+and matches it with prompt metadata:
 
-  1) PROJECT_ROOT/mj_gallery.html
-  2) PROJECT_ROOT/mj_zoom/YYYY-MM-DD/<category>/<image-stem>.html
+    <prompt_root>/
+        YYYY-MM-DD/
+            <category>/
+                prompt.txt
+                meta.json
+
+Outputs:
+
+  1) <out_file> (default: PROJECT_ROOT/mj_gallery.html)
+  2) <out_file_parent>/mj_zoom/YYYY-MM-DD/<category>/<image-stem>.html
 
 Main gallery thumbnails link to per-image zoom pages that show a big image
 and navigation controls:
+
   [Prev]  [Back to Gallery]  [Next]
 
 Zoom pages also support:
+
   - Keyboard ← / → arrows for prev/next
   - Mouse wheel up/down for prev/next (with debounce)
 """
@@ -26,7 +38,13 @@ import datetime
 import os
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+def _get_project_root() -> Path:
+    # gallery.py is in AutoVisuals/autovisuals/
+    here = Path(__file__).resolve().parent
+    return here.parent
+
+
+PROJECT_ROOT = _get_project_root()
 
 
 def build_gallery(
@@ -34,17 +52,21 @@ def build_gallery(
     prompt_root: str | Path = "prompt",
     out_file: str | Path = "mj_gallery.html",
 ) -> Path:
+    # Resolve roots (accept absolute or relative)
     download_root = Path(download_root)
     if not download_root.is_absolute():
         download_root = PROJECT_ROOT / download_root
+    download_root = download_root.resolve()
 
     prompt_root = Path(prompt_root)
     if not prompt_root.is_absolute():
         prompt_root = PROJECT_ROOT / prompt_root
+    prompt_root = prompt_root.resolve()
 
     out_path = Path(out_file)
     if not out_path.is_absolute():
         out_path = PROJECT_ROOT / out_path
+    out_path = out_path.resolve()
 
     if not download_root.exists():
         raise FileNotFoundError(f"Download root not found: {download_root}")
@@ -58,16 +80,18 @@ def build_gallery(
     # by_date[date][category] = [image paths]
     by_date: dict[str, dict[str, list[Path]]] = {}
 
-    # Newest dates first
+    # Newest dates first (by folder name)
     for day_dir in sorted(download_root.iterdir(), reverse=True):
         if not day_dir.is_dir():
             continue
         date_str = day_dir.name
+
         for cat_dir in sorted(day_dir.iterdir()):
             if not cat_dir.is_dir():
                 continue
             slug = cat_dir.name
-            # Newest images first inside each category
+
+            # Newest images first inside each category (by mtime)
             imgs = [
                 p
                 for p in sorted(
@@ -159,14 +183,21 @@ p.meta {
 }
 .links a:hover { text-decoration: underline; }
 </style>
+<script>
+// no script needed in main gallery for now
+</script>
 """
     )
     parts.append("</head>")
     parts.append("<body>")
     parts.append(f"<h1>{escape(title)}</h1>")
     parts.append(f"<p class='meta'>Generated at {escape(now)}</p>")
+    parts.append(
+        f"<p class='meta'>Source images root: {escape(str(download_root))}</p>"
+    )
 
-    # Newest dates (keys) first in output as well
+    # Newest dates first (keys are already sorted in that direction above,
+    # but we'll be explicit here too).
     for date_str, categories in sorted(by_date.items(), reverse=True):
         parts.append("<section class='section-day'>")
         parts.append(f"<h2>{escape(date_str)}</h2>")
@@ -185,12 +216,12 @@ p.meta {
             if has_prompt or has_meta:
                 bits = []
                 if has_prompt:
-                    prompt_rel = prompt_path.relative_to(out_path.parent)
+                    prompt_rel = os.path.relpath(prompt_path, start=out_path.parent)
                     bits.append(
                         f"Prompt: <a href='{escape(str(prompt_rel))}' target='_blank'>prompt.txt</a>"
                     )
                 if has_meta:
-                    meta_rel = meta_path.relative_to(out_path.parent)
+                    meta_rel = os.path.relpath(meta_path, start=out_path.parent)
                     if bits:
                         bits.append("·")
                     bits.append(
@@ -401,13 +432,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 zoom_rel_from_gallery = os.path.relpath(
                     zoom_page, start=out_path.parent
                 )
-                img_rel_from_gallery = os.path.relpath(img_path, start=out_path.parent)
+                img_rel_from_gallery = os.path.relpath(
+                    img_path, start=out_path.parent
+                )
 
                 thumb_img = (
                     f"<img src='{escape(img_rel_from_gallery)}' "
                     f"alt='{escape(img_path.name)}' loading='lazy' />"
                 )
-                thumb_html = f"<a href='{escape(zoom_rel_from_gallery)}' target='_blank'>{thumb_img}</a>"
+                thumb_html = (
+                    f"<a href='{escape(zoom_rel_from_gallery)}' "
+                    f"target='_blank'>{thumb_img}</a>"
+                )
 
                 parts.append("<div class='card'>")
                 parts.append(thumb_html)
