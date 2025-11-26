@@ -28,6 +28,8 @@ from .send_to_discord import (
 )
 from .mj_download import run_downloader
 from .gallery import build_gallery
+from .get_meta import generate_stock_metadata
+
 
 
 PROJECT_ROOT = _get_project_root()
@@ -66,11 +68,19 @@ def get_categories_for_date(date: str) -> list[str]:
 
 
 def get_prompt_file_for(date: str, category_slug: str) -> Path:
-    path = get_prompt_root() / date / category_slug / "prompt.txt"
-    if not path.exists():
-        raise FileNotFoundError(f"No prompt.txt for {date}/{category_slug}")
-    return path
+    """
+    Prefer prompt.new.txt (prompts from the latest run only).
+    Fall back to prompt.txt for backwards compatibility.
+    """
+    base_dir = get_prompt_root() / date / category_slug
+    latest = base_dir / "prompt.new.txt"
+    if latest.exists():
+        return latest
 
+    path = base_dir / "prompt.txt"
+    if not path.exists():
+        raise FileNotFoundError(f"No prompt file for {date}/{category_slug}")
+    return path
 
 # ------------------------------------------------------------------
 # Parser
@@ -306,6 +316,34 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument(
         "--date",
         help="only show this YYYY-MM-DD date (default: all dates found under prompt/).",
+    )
+
+        # meta
+    meta = subparsers.add_parser(
+        "meta",
+        help="Generate Adobe/Shutterstock/Freepik metadata CSVs from downloads + prompt meta.",
+    )
+    meta.add_argument(
+        "-d",
+        "--date",
+        default="latest",
+        help="Date folder (YYYY-MM-DD). If omitted or 'latest', use the latest date in mj_downloads.",
+    )
+    meta.add_argument(
+        "--download-dir",
+        default=DEFAULT_DOWNLOAD_DIR,   # whatever constant you already use
+        help="root folder for downloaded images (default: mj_downloads).",
+    )
+    meta.add_argument(
+        "--prompt-dir",
+        default=DEFAULT_OUT_PROMPT,
+        help="root folder for prompt data (default: prompt).",
+    )
+    meta.add_argument(
+        "-o",
+        "--out-dir",
+        default="meta",
+        help="output root folder for stock CSVs (relative to project root).",
     )
 
     return parser
@@ -606,6 +644,14 @@ def main():
             prompt_dir=args.prompt_dir,
             download_dir=args.download_dir,
             only_date=args.date,
+        )
+
+    elif args.command == "meta":
+        generate_stock_metadata(
+            date_str=args.date,
+            download_root=args.download_dir,
+            prompt_root=args.prompt_dir,
+            out_root=args.out_dir,
         )
 
     else:

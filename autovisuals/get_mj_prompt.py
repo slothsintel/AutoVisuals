@@ -401,10 +401,12 @@ TITLE RULES
 DESCRIPTION RULES
 ============================================================
 
-- 1–2 natural sentences
-- describe the subject, environment, light, and mood
-- reflect theme AND variant
-- no technical flags, no “AI”, no “midjourney”
+- MUST be shorter than 200 characters total.
+- 1 short, natural sentence (preferably ≤ 180 characters).
+- Describe only the visible subject, environment, and lighting.
+- No filler words, no long explanations, no lists.
+- No technical flags, no “AI”, no “midjourney”.
+- Must reflect the theme AND the variant.
 
 ============================================================
 KEYWORDS RULES
@@ -432,7 +434,6 @@ FINAL INSTRUCTIONS
 - return ONLY the json object, nothing else.
 - output must be valid JSON: double quotes, no trailing commas.
 """
-
 
 # ------------------------------------------------------------------
 # Core validation helpers
@@ -602,29 +603,72 @@ return only the json object.
 
 
 def save_json(items, path: Path):
-    path.write_text(json.dumps(items, indent=2, ensure_ascii=False), encoding="utf-8")
+    """
+    Append new items to existing meta.json if it exists,
+    otherwise create a new file.
+    """
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(existing, list):
+                merged = existing + items
+            else:
+                merged = items
+        except Exception:
+            # if file is corrupted or not a list, just overwrite with new items
+            merged = items
+    else:
+        merged = items
+
+    path.write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding="utf-8")
     print("saved json:", path)
 
 
 def save_csv(items, path: Path):
+    """
+    Append new rows to existing meta.csv if it exists,
+    writing the header only once.
+    """
     fields = ["id", "category", "theme", "prompt", "title", "description", "keywords"]
-    with path.open("w", newline="", encoding="utf-8") as f:
+    file_exists = path.exists()
+
+    with path.open("a" if file_exists else "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fields)
-        w.writeheader()
+        if not file_exists:
+            w.writeheader()
         for it in items:
             row = {k: it.get(k, "") for k in fields}
             if isinstance(row["keywords"], list):
                 row["keywords"] = ", ".join(row["keywords"])
             w.writerow(row)
+
     print("saved csv:", path)
 
 
 def save_prompts(items, path: Path):
-    with path.open("w", encoding="utf-8") as f:
+    """
+    - Append all prompts (with id tag) to prompt.txt (history).
+    - Write only the newly generated prompts (without id tag) to prompt.new.txt
+      so that the pipeline can send JUST these to Discord.
+    """
+    # 1) Append full prompts (including [id:xxxx]) to prompt.txt
+    with path.open("a" if path.exists() else "w", encoding="utf-8") as f_hist:
+        for it in items:
+            p_full = it.get("prompt", "").strip()
+            f_hist.write(p_full + "\n")
+
+    # 2) Overwrite prompt.new.txt with ONLY the new prompts, without uid
+    latest_path = path.with_name("prompt.new.txt")
+    with latest_path.open("w", encoding="utf-8") as f_latest:
         for it in items:
             p = it.get("prompt", "").strip()
-            # keep [av:xxxx] in the prompt so Discord sees it
-            f.write(p + "\n")
+            # strip trailing [id:xxxx] if present
+            p_clean = re.sub(r"\s*\[id:[0-9a-fA-F]+\]$", "", p)
+            f_latest.write(p_clean + "\n")
+
+    print("saved prompts:", path, "and", latest_path)
+
+
 
 # ------------------------------------------------------------------
 # Theme list loading (weighted)
