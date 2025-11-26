@@ -168,7 +168,7 @@ export MJ_CHANNEL_ID="123456789012345678"
 Follow [this](https://github.com/slothsintel/Real-ESRGAN) or original [instruction](https://github.com/xinntao/Real-ESRGAN) to install Real-ESRGAN. Quick install:
 ```shell
 cd AutoVisuals
-git clone https://github.com/slothsintel/real_esrgan.git
+git submodule add https://github.com/xinntao/Real-ESRGAN.git Real-ESRGAN
 cd Real-ESRGAN
 pip install basicsr
 pip install facexlib
