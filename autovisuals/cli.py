@@ -32,7 +32,7 @@ from .gallery import build_gallery
 
 PROJECT_ROOT = _get_project_root()
 DEFAULT_EXPORT_DIR = "/mnt/c/Users/xilu/Downloads/autovisuals_export"
-DEFAULT_THEME_CSV = "adobe_cat.csv"
+DEFAULT_THEME_CSV = "autovisuals/data/adobe_cat.csv"
 DEFAULT_OUT_PROMPT = "prompt"
 DEFAULT_DOWNLOAD_DIR = "mj_downloads"
 DEFAULT_GALLERY_HTML = "mj_gallery.html"

@@ -238,7 +238,8 @@ class MJDownloader(discord.Client):
 
         # map [av:xxxx] → (category, title, title_slug)
         id_map = self._load_id_map(date_str)
-        m = re.search(r"\[av:([0-9a-fA-F]{4,})\]", content)
+        # accept either [av:xxxx] or [id:xxxx]
+        m = re.search(r"\[(?:av|id):([0-9a-fA-F]{4,})\]", content)
         uid = m.group(1).lower() if m else None
 
         title_slug: Optional[str] = None

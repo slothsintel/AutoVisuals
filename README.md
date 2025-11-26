@@ -16,7 +16,7 @@
 [![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Gemini%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
 
 
-**AutoVisuals** designed by **Sloths Visuals (SlothsIntel)**, is a fully automated pipeline for generating **Midjourney-ready prompts**, sending them to **Discord**, automatically **downloading and splitting MJ images**, and building a beautiful **HTML gallery** with zoom navigation, for business design, internal datasets, Adobe Stock, or other illustration stocks.
+**AutoVisuals** designed by **Sloths Visuals (SlothsIntel)**, is a fully automated pipeline for generating randomised **Midjourney-ready prompts**, sending them to **Discord**, automatically **downloading and splitting MJ images**, and building a stylish **HTML gallery** with zoom navigation, for business design, internal datasets, Adobe Stock, and other illustration stocks.
 
 ---
 
@@ -27,9 +27,9 @@
   - [From conda](#From-conda)
   - [From source(advanced)](#From-source-advanced)
 - [Required Environment Variables](#RequiredEnvironment-Variables)
-- [Optional Scaling Modules](#Optional_Scaling_Modules)
-  - [Install Real-ESRGAN](#Install_Real-ESRGAN)
-  - [Install SwinIR](#Install_SwinIR)
+- [Optional Scaling Modules](#Optional-Scaling-Modules)
+  - [Install Real-ESRGAN](#Install-Real-ESRGAN)
+  - [Install SwinIR](#Install-SwinIR)
 - [Usage](#Usage)
   - [Pipeline](#Pipeline)
   - [Subcommand](#Subcommand)
@@ -107,6 +107,11 @@ cd <your_work_directory>
 
 ## From source (advanced)
 
+```shell
+conda create -n autovisuals python==3.11
+conda activate autovisuals
+```
+
 Clone the repository.
 ```shell
 git clone https://github.com/slothsintel/AutoVisuals
@@ -126,7 +131,7 @@ source ~/.bashrc
 ```
 Install scaling proccessor (optional):
 
-*WIP*
+[See here](#Optional-Scaling-Module:)
 
 <p align="right">
   <a href="#top" style="text-decoration:none;">
@@ -154,7 +159,9 @@ export DISCORD_BOT_TOKEN="your-bot-token"
 export MJ_CHANNEL_ID="123456789012345678"
 ```
 
-Optional Scaling Module:
+---
+
+<span id="Optional Scaling Module:"></span>
 
 ## Install Real-ESRGAN
 
@@ -171,7 +178,7 @@ python setup.py develop
 ```
 
 
-## Install SwinIR*
+## Install SwinIR
 
 <p align="right">
   <a href="#top" style="text-decoration:none;">
