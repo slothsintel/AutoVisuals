@@ -43,6 +43,43 @@ DEFAULT_DOWNLOAD_DIR = PROJECT_ROOT / "mj_downloads"
 DEFAULT_OUT_PROMPT = PROJECT_ROOT / "prompt"
 DEFAULT_OUT_ROOT = PROJECT_ROOT / "meta"
 
+@dataclass
+class CategoryMap:
+    """Mapping of category names to Adobe codes and platform categories."""
+    adobe_cat: str
+    adobe_code: int
+    shutterstock_cat: str
+
+
+def load_category_mapping(data_root: Path = None) -> Dict[str, CategoryMap]:
+    """
+    Load cat_map.csv and build a mapping of adobe_cat -> CategoryMap.
+    """
+    if data_root is None:
+        data_root = PROJECT_ROOT / "autovisuals" / "data"
+    
+    cat_map_path = data_root / "cat_map.csv"
+    mapping: Dict[str, CategoryMap] = {}
+    
+    if not cat_map_path.exists():
+        logging.warning("Category mapping file not found: %s", cat_map_path)
+        return mapping
+    
+    try:
+        with cat_map_path.open("r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                adobe_cat = row.get("adobe_cat", "").strip()
+                if adobe_cat:
+                    mapping[adobe_cat] = CategoryMap(
+                        adobe_cat=adobe_cat,
+                        adobe_code=int(row.get("adobe_code", 0)),
+                        shutterstock_cat=row.get("shutterstock_cat", "").strip()
+                    )
+    except Exception as e:
+        logging.warning("Error loading category mapping: %s", e)
+    
+    return mapping
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -139,10 +176,20 @@ def load_category_meta(
 
 def join_keywords(rec: dict) -> str:
     kw = rec.get("keywords", [])
+
+    def _normalize_keyword(val: object) -> str:
+        s = str(val or "").strip()
+        if s.lower() == "generative ai":
+            return "generative AI"
+        return s
+
     if isinstance(kw, list):
-        return ", ".join(str(k).strip() for k in kw if str(k).strip())
+        normalized = [_normalize_keyword(k) for k in kw]
+        return ", ".join(k for k in normalized if k)
     if isinstance(kw, str):
-        return kw.strip()
+        parts = [p.strip() for p in kw.split(",") if p.strip()]
+        parts = ["generative AI" if p.lower() == "generative ai" else p for p in parts]
+        return ", ".join(parts)
     return ""
 
 
@@ -183,49 +230,64 @@ def clean_prompt_for_freepik(prompt: str) -> str:
     return txt
 
 
+def convert_filename_extension(filename: str, new_ext: str = "-standard-scale-6_00x.jpeg") -> str:
+    """
+    Convert filename extension to the specified format.
+    """
+    path = Path(filename)
+    return path.stem + new_ext
+
 # ---------------------------------------------------------------------------
 # Row builders for each platform
 # ---------------------------------------------------------------------------
 
 
-def make_adobe_row(filename: str, rec: dict, category: str) -> dict:
+def make_adobe_row(filename: str, rec: dict, category: str, cat_map: Dict[str, CategoryMap]) -> dict:
+    filename = convert_filename_extension(filename)
     title = (
         str(rec.get("title", "")).strip()
         or str(rec.get("theme", "")).strip()
         or category
     )
-    # Adobe "Title" is the main short description (limit to 200 chars)
     title = trim_description(title, max_chars=200)
     keywords = join_keywords(rec)
-
+    
+    # Get Adobe code from mapping
+    adobe_code = cat_map.get(category, CategoryMap(category, 0, "")).adobe_code
+    
     return {
         "Filename": filename,
         "Title": title,
         "Keywords": keywords,
-        "Category": category,
-        "Releases": "",  # no releases by default
+        "Category": adobe_code,
+        "Releases": "",
     }
 
 
-def make_shutterstock_row(filename: str, rec: dict, category: str) -> dict:
+def make_shutterstock_row(filename: str, rec: dict, category: str, cat_map: Dict[str, CategoryMap]) -> dict:
+    filename = convert_filename_extension(filename)
     desc = str(rec.get("description", "")).strip()
     if not desc:
         desc = str(rec.get("title", "")).strip() or category
     desc = trim_description(desc, max_chars=200)
     keywords = join_keywords(rec)
 
+    # Map adobe category name -> shutterstock category (fallback to category)
+    shutter_cat = cat_map.get(category, CategoryMap(category, 0, category)).shutterstock_cat or category
+
     return {
         "Filename": filename,
         "Description": desc,
         "Keywords": keywords,
-        "Categories": category,
+        "Categories": shutter_cat,
         "Editorial": "no",
         "Mature content": "no",
-        "illustration": "no",
+        "illustration": "yes",
     }
 
 
 def make_freepik_row(filename: str, rec: dict, category: str) -> dict:
+    filename = convert_filename_extension(filename)
     title = str(rec.get("title", "")).strip() or category
     keywords = join_keywords(rec)
     prompt = clean_prompt_for_freepik(str(rec.get("prompt", "")).strip())
@@ -283,6 +345,8 @@ def generate_stock_metadata(
     logging.info("Download root: %s", day_dir)
     logging.info("Prompt root  : %s", prompt_root)
 
+    cat_map = load_category_mapping()
+    
     adobe_rows: List[dict] = []
     shutter_rows: List[dict] = []
     freepik_rows: List[dict] = []
@@ -307,8 +371,8 @@ def generate_stock_metadata(
             rec = meta_map.get(title_slug) or default_rec or {}
             filename = img_path.name
 
-            adobe_rows.append(make_adobe_row(filename, rec, category))
-            shutter_rows.append(make_shutterstock_row(filename, rec, category))
+            adobe_rows.append(make_adobe_row(filename, rec, category, cat_map))
+            shutter_rows.append(make_shutterstock_row(filename, rec, category, cat_map))
             freepik_rows.append(make_freepik_row(filename, rec, category))
 
     if not adobe_rows:

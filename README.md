@@ -30,6 +30,7 @@
 - [Optional Scaling Modules](#Optional-Scaling-Modules)
   - [Install Real-ESRGAN](#Install-Real-ESRGAN)
   - [Install SwinIR](#Install-SwinIR)
+  - [Install Topaz](#Install-Topaz)
 - [Usage](#Usage)
   - [Pipeline](#Pipeline)
   - [Subcommand](#Subcommand)
@@ -56,7 +57,7 @@
 
 ## Scaling Processor (optional)
 
-*WIP*
+Coming soon
 
 ## HTML Gallery Builder
 - Builds a techno-tidy responsive gallery:
@@ -91,7 +92,7 @@ conda activate autovisuals
 cd <your_work_directory>
 ```
 
-*WIP*
+Coming soon
 
 ## From conda
 
@@ -103,7 +104,7 @@ conda activate autovisuals
 cd <your_work_directory>
 ```
 
-*WIP*
+Coming soon
 
 ## From source (advanced)
 
@@ -131,7 +132,7 @@ source ~/.bashrc
 ```
 Install scaling proccessor (optional):
 
-[See here](#Optional-Scaling-Module:)
+[See details here](#Optional-Scaling-Module:)
 
 <p align="right">
   <a href="#top" style="text-decoration:none;">
@@ -179,6 +180,14 @@ python setup.py develop
 
 
 ## Install SwinIR
+
+Coming soon
+
+## Install Topaz
+
+Coming soon
+
+
 
 <p align="right">
   <a href="#top" style="text-decoration:none;">
@@ -262,7 +271,7 @@ Option:
 --out OUT         gallery file output directory, mj_gallery.html by default.
 ```
 
-Additional command `autovisuals status` to Show a tidy summary of prompts + images per date/theme.
+Additional command `autovisuals status` to show a tidy summary of prompts + images per date/theme.
 
 Example:
 ```
@@ -272,6 +281,9 @@ DATE         CATEGORY             PROMPTS   IMAGES
 ---------------------------------------------------
 TOTAL                                6        24
 ```
+
+Additional command `autovisuals meta` to create metadata uploads to Adobe Stock/Shutterstock/Freepik.
+
 <p align="right">
   <a href="#top" style="text-decoration:none;">
     ⬆️
@@ -316,7 +328,11 @@ sunset over mountains,5
 ---
 
 # Future Modules
-   
+
+- SwinIR installation  
+- Topaz installation  
+- pip installation
+- conda installation       
 - Windows installation  
 - GUI (AutoVisuals Studio)  
 
