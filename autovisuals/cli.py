@@ -243,15 +243,15 @@ def build_parser() -> argparse.ArgumentParser:
         "-d",
         "--records",
         type=int,
-        default=3,
-        help="number of prompts for each theme and title, 3 by default.",
+        default=5,
+        help="number of prompts for each theme and title, 5 by default.",
     )
     pipe.add_argument(
         "-r",
         "--repeat",
         type=int,
-        default=5,
-        help="number of times to repeat each prompt for diversity, 5 by default.",
+        default=2,
+        help="number of times to repeat each prompt for diversity, 2 by default.",
     )
     pipe.add_argument(
         "-o",

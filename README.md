@@ -48,6 +48,7 @@
 ## Prompt & Metadata Generator
 - Generates output: **theme**, **title**, **description**, **45 keywords**, and **/imagine prompt**.
 - Supports output formats: **txt**, **csv**, and **json**.
+- Supports stock metadata formats: **Adobe Stock**, **Shutterstock**, and **Freepik**.
 
 ## Discord Automation
 - Sends each prompt line to any Discord channel via **webhook**.
