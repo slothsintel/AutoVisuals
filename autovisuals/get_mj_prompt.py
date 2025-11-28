@@ -266,14 +266,14 @@ def attach_id_tag(prompt: str, uid: str) -> str:
     Attach an ID tag before the Midjourney flags so we can trace outputs.
 
     Final shape:
-        /imagine prompt: ... [av:abcd1234] --v 7 --ar 16:9 --s 5 --c 20 --raw --r N
+        /imagine prompt: ... [av:abcd1234] --v 7 --ar 16:9 --s 5 --c 10 --raw --r N
     """
     prompt = prompt.rstrip()
     tag = f"[av:{uid}]"
 
     # Look for the standard flag tail at the end of the prompt
     flag_pattern = re.compile(
-        r"(\s*--v\s+7\s+--ar\s+16:9\s+--s\s+5\s+--c\s+20\s+--raw\s+--r\s+\d+\s*)$"
+        r"(\s*--v\s+7\s+--ar\s+16:9\s+--s\s+5\s+--c\s+10\s+--raw\s+--r\s+\d+\s*)$"
     )
     m = flag_pattern.search(prompt)
     if m:
@@ -319,22 +319,25 @@ you will sometimes receive a "variant" object in the user input:
   "time_of_day": "...",       # e.g. dawn, golden hour, midday, blue hour
   "season": "...",            # e.g. spring, autumn, winter
   "weather": "...",           # e.g. misty air, clear sky, drizzle, snowfall
-  "palette": "...",           # e.g. warm gold, cool blue, pastel, monochrome
-  "style_family": "...",      # e.g. photography, illustration, 3d render, vector
+  "palette": "...",           # e.g. warm gold, cool blue, monochrome
+  "camera_type": "...",      # e.g. full-frame DSLR photo, mirrorless camera photo, DSLR wildlife photo, studio macro photo
+  "lens_type": "...",       # e.g. 50mm prime lens, 85mm portrait lens, 35mm lens, 24mm lens, 100mm lens, 200mm lens
+  "aperture": "...",         # e.g. shallow depth of field, f/1.8, f/2.8, f/4, f/8, f/11
+  "iso": "...",              # e.g. ISO 100, ISO 200, ISO 400
+  "shutter_speed": "...",   # e.g. 1/125s, 1/250s, 1/320s, 1/500s, 1/1000s
   "complexity": "...",        # e.g. minimal composition, moderate composition
   "variant_id": "int"         # unique per run to force structural variation
 }}
 
 rules for "variant":
 - treat ALL variant fields as HARD CONSTRAINTS.
-- the "prompt" MUST clearly reflect viewpoint, time_of_day, weather, palette, style_family, etc.
+- the "prompt" MUST clearly reflect viewpoint, time_of_day, weather, palette, camera_type, lens_type, aperture, iso, shutter_speed, etc.
 - different variant values for the SAME theme must produce noticeably different:
   - composition
   - lighting behaviour
   - environment cues
   - colour palette
   - mood
-  - camera perspective
   - style vocabulary
 
 ============================================================
@@ -342,7 +345,7 @@ CATEGORY / THEME
 ============================================================
 
 rules for "category":
-- broad stock-photo category matching the theme (nature, business, travel, animal, food, architecture, technology, abstract, lifestyle).
+- broad stock-photo category matching the theme (nature, business, travel, animal, food, architecture, technology, lifestyle).
 - must be lowercase.
 - must NOT repeat the theme.
 
@@ -358,8 +361,12 @@ the "prompt" field:
 - DO NOT include '/imagine prompt:'.
 - describe ONE simple, clean subject suitable for stock.
 - no human faces, no full human characters.
-- avoid detailed anatomy (fingers, teeth).
+- no fingers, no teeth.
+- no keyboards.
 - no copyrighted characters, no brands, no logos, no text.
+- no commercial logos, no alphabets, no symbols, no letters, no numbers.
+- no digital art, no paintings, no drawings, no illustrations, no 3d renders, no surrealism, no fantasy, no dreamy, no cinematic.
+- no soft, no blurry, no soft pastel, no low-contrast, no muted colours, no dark, no moody, no dramatic lighting, no gleams, no lens flares, no glows.
 
 content requirements:
 - reflect the chosen theme PLUS the "variant" fields.
@@ -368,13 +375,15 @@ content requirements:
 - must incorporate the palette, weather, viewpoint, and time_of_day from variant.
 - must be positive or neutral in mood.
 
-style rules:
-- style must align with "style_family" from variant.
-- inside that family, pick a fresh, distinct style:
-  - photography → cinema still, macro realism, long-exposure landscape, bokeh-like background (no faces)
-  - illustration → watercolor, gouache, ink, soft pastel
-  - 3d render → glossy cyberpunk, soft claymation, clean minimal render
-  - vector → flat lighting, gradient minimalism
+camera specs rules:
+- camera specs includes camera_type, lends_type, aperture, iso, shutter_speed, must align with randomised theme.
+- for the chosen theme, pick a fresh, distinct camera/lens/aperture/iso/shutter combo:
+  - outdoor/nature/landscape → full-frame DSLR photo, 24mm lens, f/8, ISO 100, 1/250s
+  - indoor/lifestype/home scene → full-frame DSLR, 35mm lens, f/2.8, ISO 200, 1/125s
+  - architecture/buildings → mirrorless camera photo, 24mm lens, f/11, ISO 100, 1/320s
+  - animal/wildlife → DSLR wildlife photo, 200mm lens, f/2.8, ISO 400, 1/1000s
+  - graphic resources/minimal → studio macro photo, 100mm lens, f/11, ISO 100, 1/125s
+  - business/technology → full-frame DSLR photo, 50mm prime lens, f/4, ISO 200, 1/250s
 - never reuse the same style wording for different variant_id values within the same theme.
 
 STRUCTURAL ANTI-REPETITION:
@@ -386,7 +395,7 @@ STRUCTURAL ANTI-REPETITION:
 
 END OF PROMPT (MANDATORY):
 the prompt must end with:
-  --v 7 --ar 16:9 --s 5 --c 20 --raw --r {repeat}
+  --v 7 --ar 16:9 --s 5 --c 10 --raw --r {repeat}
 
 ============================================================
 TITLE RULES
@@ -419,7 +428,11 @@ KEYWORDS RULES
   - subject
   - environment
   - mood
-  - style family
+  - camera_type
+  - lens_type
+  - aperture
+  - iso
+  - shutter_speed
 - item 45 must be: "generative ai"
 - no duplicates
 - all lowercase
@@ -490,10 +503,91 @@ def ensure_keywords(data: dict) -> dict:
 # ------------------------------------------------------------------
 
 
-def make_variant(variant_id: int) -> dict:
+# Theme-to-camera-specs mapping (case-insensitive theme matching)
+THEME_CAMERA_SPECS = {
+    "animals": {"camera_type": "DSLR wildlife photo", "lens_type": "200mm lens", "aperture": "f/2.8", "iso": "ISO 400", "shutter_speed": "1/1000s"},
+    "buildings-and-architecture": {"camera_type": "mirrorless camera photo", "lens_type": "24mm lens", "aperture": "f/11", "iso": "ISO 100", "shutter_speed": "1/320s"},
+    "business": {"camera_type": "full-frame DSLR photo", "lens_type": "50mm prime lens", "aperture": "f/4", "iso": "ISO 200", "shutter_speed": "1/250s"},
+    "graphic-resources": {"camera_type": "studio macro photo", "lens_type": "100mm lens", "aperture": "f/11", "iso": "ISO 100", "shutter_speed": "1/125s"},
+    "hobbies-and-leisure": {"camera_type": "full-frame DSLR", "lens_type": "35mm lens", "aperture": "f/2.8", "iso": "ISO 200", "shutter_speed": "1/125s"},
+    "landscape": {"camera_type": "full-frame DSLR photo", "lens_type": "24mm lens", "aperture": "f/8", "iso": "ISO 100", "shutter_speed": "1/250s"},
+    "lifestyle": {"camera_type": "full-frame DSLR", "lens_type": "35mm lens", "aperture": "f/2.8", "iso": "ISO 200", "shutter_speed": "1/125s"},
+    "science": {"camera_type": "DSLR wildlife photo", "lens_type": "200mm lens", "aperture": "f/2.8", "iso": "ISO 400", "shutter_speed": "1/1000s"},
+    "sports": {"camera_type": "full-frame DSLR photo", "lens_type": "24mm lens", "aperture": "f/8", "iso": "ISO 100", "shutter_speed": "1/250s"},
+    "technology": {"camera_type": "DSLR wildlife photo", "lens_type": "200mm lens", "aperture": "f/2.8", "iso": "ISO 400", "shutter_speed": "1/1000s"},
+    "travel": {"camera_type": "full-frame DSLR photo", "lens_type": "24mm lens", "aperture": "f/8", "iso": "ISO 100", "shutter_speed": "1/250s"},
+}
+
+def classify_theme_for_camera(theme: str) -> str:
+    """
+    Map a free-text theme from adobe_cat.csv to one of the keys
+    in THEME_CAMERA_SPECS so camera specs align with the object theme.
+
+    This is heuristic; extend keyword lists as you refine your CSV.
+    """
+    t = (theme or "").lower()
+
+    # animals / wildlife
+    if any(w in t for w in ["animal", "wildlife", "dog", "cat", "bird", "horse", "fox", "lion"]):
+        return "animals"
+
+    # buildings & architecture / city
+    if any(w in t for w in ["building", "architecture", "city", "urban", "skyline", "skyscraper", "bridge", "street"]):
+        return "buildings-and-architecture"
+
+    # landscape / outdoor nature
+    if any(w in t for w in [
+        "forest", "mountain", "valley", "lake", "river", "sea", "ocean",
+        "beach", "sunrise", "sunset", "landscape", "meadow", "field", "countryside"
+    ]):
+        return "landscape"
+
+    # travel
+    if any(w in t for w in ["travel", "tourist", "destination", "landmark", "journey", "vacation", "holiday"]):
+        return "travel"
+
+    # business / office / finance / workspace
+    if any(w in t for w in ["business", "office", "startup", "meeting", "corporate", "finance", "analytics", "workspace"]):
+        return "business"
+
+    # technology / digital / data / abstract tech
+    if any(w in t for w in ["tech", "technology", "circuit", "chip", "server", "code", "data", "digital", "ai", "robot", "cyber"]):
+        return "technology"
+
+    # graphic resources / backgrounds / textures
+    if any(w in t for w in ["background", "texture", "pattern", "abstract", "minimal", "gradient", "geometry", "wallpaper", "seamless"]):
+        return "graphic-resources"
+
+    # lifestyle / indoor / cozy interiors
+    if any(w in t for w in ["living room", "interior", "indoor", "home", "kitchen", "bedroom", "sofa", "desk", "cozy", "coffee"]):
+        return "lifestyle"
+
+    # hobbies / leisure
+    if any(w in t for w in ["hobby", "leisure", "game", "gaming", "reading", "relaxing", "craft", "diy", "baking"]):
+        return "hobbies-and-leisure"
+
+    # sports
+    if any(w in t for w in ["sport", "football", "soccer", "basketball", "tennis", "running", "fitness", "gym"]):
+        return "sports"
+
+    # science
+    if any(w in t for w in ["lab", "laboratory", "experiment", "microscope", "dna", "molecule", "chemical"]):
+        return "science"
+
+    # fallback: safe general bucket
+    return "lifestyle"
+
+
+def make_variant(variant_id: int, theme: str = None) -> dict:
     """
     Generate a random variant to force visual and structural diversity
     between runs for the same theme.
+
+    NEW LOGIC:
+    - theme comes from weighted adobe_cat.csv.
+    - we map that theme to a camera spec key via classify_theme_for_camera().
+    - camera_type / lens_type / aperture / iso / shutter_speed come from THEME_CAMERA_SPECS.
+    - only viewpoint / time_of_day / season / weather / palette / complexity are randomised.
     """
     viewpoints = [
         "macro close-up",
@@ -532,17 +626,9 @@ def make_variant(variant_id: int) -> dict:
     palettes = [
         "warm golden palette",
         "cool blue palette",
-        "soft pastel palette",
         "high-contrast palette",
         "monochrome palette",
         "earth tones palette",
-    ]
-
-    style_families = [
-        "photography",
-        "illustration",
-        "3d render",
-        "vector",
     ]
 
     complexities = [
@@ -550,16 +636,36 @@ def make_variant(variant_id: int) -> dict:
         "moderate composition",
     ]
 
-    return {
+    # ---- NEW: derive camera spec from the chosen theme ----
+    if theme:
+        camera_key = classify_theme_for_camera(theme)
+    else:
+        camera_key = "lifestyle"  # safe default
+
+    camera_spec = THEME_CAMERA_SPECS.get(camera_key)
+    if camera_spec is None:
+        # hard safety fallback
+        camera_spec = THEME_CAMERA_SPECS["lifestyle"]
+
+    variant = {
         "viewpoint": random.choice(viewpoints),
         "time_of_day": random.choice(times_of_day),
         "season": random.choice(seasons),
         "weather": random.choice(weather_options),
         "palette": random.choice(palettes),
-        "style_family": random.choice(style_families),
+
+        # theme-based camera spec (NOT random anymore)
+        "camera_type": camera_spec["camera_type"],
+        "lens_type": camera_spec["lens_type"],
+        "aperture": camera_spec["aperture"],
+        "iso": camera_spec["iso"],
+        "shutter_speed": camera_spec["shutter_speed"],
+
         "complexity": random.choice(complexities),
         "variant_id": variant_id,
     }
+
+    return variant
 
 
 def generate_for_theme(provider: str, theme: str, repeat: int, variant_id: int) -> dict:
@@ -567,7 +673,7 @@ def generate_for_theme(provider: str, theme: str, repeat: int, variant_id: int) 
     Call the model for a single theme + variant and return validated data.
     """
     system_prompt = make_system_prompt(repeat)
-    variant = make_variant(variant_id)
+    variant = make_variant(variant_id, theme=theme)
 
     user_prompt = f"""
 theme: "{theme}"

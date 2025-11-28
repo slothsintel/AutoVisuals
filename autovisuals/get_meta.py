@@ -230,7 +230,7 @@ def clean_prompt_for_freepik(prompt: str) -> str:
     return txt
 
 
-def convert_filename_extension(filename: str, new_ext: str = "-standard-scale-6_00x.jpeg") -> str:
+def convert_filename_extension(filename: str, new_ext: str = "-standard-scale-8_00x.jpeg") -> str:
     """
     Convert filename extension to the specified format.
     """
