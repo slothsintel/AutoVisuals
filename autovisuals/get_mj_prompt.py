@@ -318,7 +318,7 @@ you will sometimes receive a "variant" object in the user input:
   "viewpoint": "...",         # e.g. macro close-up, high angle, telephoto, overhead
   "time_of_day": "...",       # e.g. dawn, golden hour, midday, blue hour
   "season": "...",            # e.g. spring, autumn, winter
-  "weather": "...",           # e.g. misty air, clear sky, drizzle, snowfall
+  "weather": "...",           # e.g. bright air, clear sky, great visibility
   "palette": "...",           # e.g. warm gold, cool blue, monochrome
   "camera_type": "...",      # e.g. full-frame DSLR photo, mirrorless camera photo, DSLR wildlife photo, studio macro photo
   "lens_type": "...",       # e.g. 50mm prime lens, 85mm portrait lens, 35mm lens, 24mm lens, 100mm lens, 200mm lens
@@ -361,12 +361,12 @@ the "prompt" field:
 - DO NOT include '/imagine prompt:'.
 - describe ONE simple, clean subject suitable for stock.
 - no human faces, no full human characters.
-- no fingers, no teeth.
+- no fingers, no teeth, no hands, no faces.
 - no keyboards.
 - no copyrighted characters, no brands, no logos, no text.
 - no commercial logos, no alphabets, no symbols, no letters, no numbers.
 - no digital art, no paintings, no drawings, no illustrations, no 3d renders, no surrealism, no fantasy, no dreamy, no cinematic.
-- no soft, no blurry, no soft pastel, no low-contrast, no muted colours, no dark, no moody, no dramatic lighting, no gleams, no lens flares, no glows.
+- no soft, no blurry, no blurred, no blur, no mist, no soft pastel, no low-contrast, no muted colours, no dark, no moody, no dramatic lighting, no gleams, no lens flares, no glows.
 
 content requirements:
 - reflect the chosen theme PLUS the "variant" fields.
@@ -571,7 +571,7 @@ def classify_theme_for_camera(theme: str) -> str:
         return "sports"
 
     # science
-    if any(w in t for w in ["lab", "laboratory", "experiment", "microscope", "dna", "molecule", "chemical"]):
+    if any(w in t for w in ["pen", "chart", "monitor", "lab", "laboratory", "experiment", "microscope", "dna", "molecule", "chemical"]):
         return "science"
 
     # fallback: safe general bucket
@@ -616,10 +616,9 @@ def make_variant(variant_id: int, theme: str = None) -> dict:
 
     weather_options = [
         "clear sky",
-        "light mist",
-        "hazy air",
-        "soft drizzle",
-        "snowfall",
+        "bright sunlight",
+        "light air",
+        "great visibility",
         "after-rain wet surfaces",
     ]
 
