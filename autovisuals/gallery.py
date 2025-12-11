@@ -1,463 +1,324 @@
-"""
-AutoVisuals gallery builder.
+# AutoVisuals Overlay Gallery with All Tab + Date Tabs and Theme Subtabs + All-Themes Under Date
+# Includes scroll restore, overlay, and metadata-aware thumbnails
 
-Scans a download root like:
-
-    <download_root>/
-        YYYY-MM-DD/
-            <category>/
-                *.png / *.jpg / *.jpeg / *.webp
-
-and matches it with prompt metadata:
-
-    <prompt_root>/
-        YYYY-MM-DD/
-            <category>/
-                prompt.txt
-                meta.json
-
-Outputs:
-
-  1) <out_file> (default: PROJECT_ROOT/mj_gallery.html)
-  2) <out_file_parent>/mj_zoom/YYYY-MM-DD/<category>/<image-stem>.html
-
-Main gallery thumbnails link to per-image zoom pages that show a big image
-and navigation controls:
-
-  [Prev]  [Back to Gallery]  [Next]
-
-Zoom pages also support:
-
-  - Keyboard ← / → arrows for prev/next
-  - Mouse wheel up/down for prev/next (with debounce)
-"""
-
-from pathlib import Path
-from html import escape
+from __future__ import annotations
+import argparse
 import datetime
+import html
+import json
 import os
+import csv
+from pathlib import Path
+from typing import Dict, List
 
+def escape(s: str) -> str:
+    return html.escape(s, quote=True)
 
-def _get_project_root() -> Path:
-    # gallery.py is in AutoVisuals/autovisuals/
-    here = Path(__file__).resolve().parent
-    return here.parent
-
-
-PROJECT_ROOT = _get_project_root()
-
-
-def build_gallery(
-    download_root: str | Path = "mj_downloads",
-    prompt_root: str | Path = "prompt",
-    out_file: str | Path = "mj_gallery.html",
-) -> Path:
-    # Resolve roots (accept absolute or relative)
-    download_root = Path(download_root)
-    if not download_root.is_absolute():
-        download_root = PROJECT_ROOT / download_root
-    download_root = download_root.resolve()
-
-    prompt_root = Path(prompt_root)
-    if not prompt_root.is_absolute():
-        prompt_root = PROJECT_ROOT / prompt_root
-    prompt_root = prompt_root.resolve()
-
-    out_path = Path(out_file)
-    if not out_path.is_absolute():
-        out_path = PROJECT_ROOT / out_path
-    out_path = out_path.resolve()
-
-    if not download_root.exists():
-        raise FileNotFoundError(f"Download root not found: {download_root}")
-
-    zoom_root = out_path.parent / "mj_zoom"
-    zoom_root.mkdir(parents=True, exist_ok=True)
-
-    title = "AutoVisuals Midjourney Gallery"
-    now = datetime.datetime.now().isoformat(timespec="seconds")
-
-    # by_date[date][category] = [image paths]
-    by_date: dict[str, dict[str, list[Path]]] = {}
-
-    # Newest dates first (by folder name)
+def collect_images(download_root: Path) -> Dict[str, Dict[str, List[Path]]]:
+    exts = {".png", ".jpg", ".jpeg", ".webp"}
+    out: Dict[str, Dict[str, List[Path]]] = {}
     for day_dir in sorted(download_root.iterdir(), reverse=True):
         if not day_dir.is_dir():
             continue
-        date_str = day_dir.name
-
+        date = day_dir.name
+        out[date] = {}
         for cat_dir in sorted(day_dir.iterdir()):
             if not cat_dir.is_dir():
                 continue
-            slug = cat_dir.name
-
-            # Newest images first inside each category (by mtime)
-            imgs = [
-                p
-                for p in sorted(
-                    cat_dir.iterdir(),
-                    key=lambda x: x.stat().st_mtime,
-                    reverse=True,
-                )
-                if p.is_file()
-                and p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")
+            images = [
+                p for p in sorted(cat_dir.iterdir())
+                if p.suffix.lower() in exts
             ]
-            if not imgs:
+            if images:
+                out[date][cat_dir.name] = images
+    return out
+
+def load_metadata(prompt_root: Path) -> Dict[str, Dict[str, str]]:
+    meta = {}
+    for date_dir in prompt_root.iterdir():
+        if not date_dir.is_dir():
+            continue
+        for theme_dir in date_dir.iterdir():
+            meta_file = theme_dir / "meta.csv"
+            if not meta_file.exists():
                 continue
-            by_date.setdefault(date_str, {})[slug] = imgs
+            with open(meta_file, newline='', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    base_title = row.get("title", "").replace(" ", "_").strip()
+                    if base_title:
+                        meta[base_title] = {
+                            "title": row.get("title", ""),
+                            "keywords": row.get("keywords", ""),
+                            "description": row.get("description", ""),
+                            "category": row.get("category") or row.get("theme") or theme_dir.name
+                        }
+    return meta
 
-    if not by_date:
-        raise RuntimeError(f"No images found under {download_root}")
+def fuzzy_match(filename: str, metadata: Dict[str, Dict[str, str]]) -> Dict[str, str]:
+    for key in metadata:
+        if filename.startswith(key):
+            return metadata[key]
+    return {}
 
-    parts: list[str] = []
-    parts.append("<!DOCTYPE html>")
-    parts.append("<html lang='en'>")
-    parts.append("<head>")
-    parts.append("<meta charset='UTF-8'>")
-    parts.append(f"<title>{escape(title)}</title>")
-    parts.append(
-        """
+def build_gallery(download_root, prompt_root, out_file):
+    from datetime import datetime
+    images = collect_images(Path(download_root))
+    metadata = load_metadata(Path(prompt_root))
+    now = datetime.now().isoformat(timespec="seconds")
+
+    out_path = Path(out_file)
+    parts: List[str] = []
+
+    parts.append("""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>AutoVisuals Gallery</title>
 <style>
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #020617;
-  color: #e5e7eb;
-  margin: 0;
-  padding: 1.5rem;
+  background:#ffe4e1;
+  color:black;
+  font-family:sans-serif;
+  margin:0;
+  padding:1rem;
 }
-h1 { margin-bottom: 0.25rem; }
-h2 { margin-top: 2rem; margin-bottom: 0.75rem; }
-h3 { margin-top: 1rem; margin-bottom: 0.35rem; }
-p.meta {
-  color: #9ca3af;
-  font-size: 0.875rem;
+.tabs, .subtabs {
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.5rem;
+  margin:1rem 0;
 }
-.section-day {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #1f2937;
+.tabs button, .subtabs button {
+  padding:0.4rem 0.8rem;
+  background:#d46a6a;
+  border:none;
+  border-radius:999px;
+  color:white;
+  cursor:pointer;
 }
-.section-theme { margin-bottom: 1.5rem; }
+.tabs button.active, .subtabs button.active {
+  background:#1e293b;
+}
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
+  display:none;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:0.6rem;
 }
 .card {
-  background: #020617;
-  border-radius: 0.75rem;
-  padding: 0.5rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-  border: 1px solid #1e293b;
+  background:#fef0f0;
+  padding:0.5rem;
+  border-radius:0.5rem;
 }
-.card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
+.card img { width:100%; border-radius:0.5rem; }
+.card .filename { margin-top:0.25rem; font-size:0.7rem; color:#240101; }
+#overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.95);
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:1rem;
+  text-align:center;
 }
-.card span {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
-  word-break: break-all;
+#overlay.open { display:flex; }
+#overlay img {
+  max-width:90vw;
+  max-height:70vh;
+  border-radius:0.75rem;
+  cursor: pointer;
 }
-.badge {
-  display: inline-block;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  background: #0f172a;
-  border: 1px solid #1d4ed8;
-  font-size: 0.7rem;
-  color: #bfdbfe;
-  margin-left: 0.4rem;
+#overlay .caption {
+  margin-top:1rem;
+  color:#e2e8f0;
+  font-size:0.9rem;
 }
-.links {
-  font-size: 0.8rem;
-  margin-bottom: 0.5rem;
+#overlay .meta {
+  margin-top:0.5rem;
+  color:#94a3b8;
+  font-size:0.8rem;
+  max-width:90vw;
+  white-space:pre-wrap;
 }
-.links a {
-  color: #60a5fa;
-  text-decoration: none;
+#overlay .nav {
+  display:flex;
+  gap:1rem;
+  margin-top:1rem;
 }
-.links a:hover { text-decoration: underline; }
-</style>
-<script>
-// no script needed in main gallery for now
-</script>
-"""
-    )
-    parts.append("</head>")
-    parts.append("<body>")
-    parts.append(f"<h1>{escape(title)}</h1>")
-    parts.append(f"<p class='meta'>Generated at {escape(now)}</p>")
-    parts.append(
-        f"<p class='meta'>Source images root: {escape(str(download_root))}</p>"
-    )
-
-    # Newest dates first (keys are already sorted in that direction above,
-    # but we'll be explicit here too).
-    for date_str, categories in sorted(by_date.items(), reverse=True):
-        parts.append("<section class='section-day'>")
-        parts.append(f"<h2>{escape(date_str)}</h2>")
-
-        for slug, files in sorted(categories.items()):
-            cat_title = slug.replace("-", " ").title()
-
-            cat_prompt_dir = prompt_root / date_str / slug
-            prompt_path = cat_prompt_dir / "prompt.txt"
-            meta_path = cat_prompt_dir / "meta.json"
-
-            has_prompt = prompt_path.exists()
-            has_meta = meta_path.exists()
-
-            links_html = ""
-            if has_prompt or has_meta:
-                bits = []
-                if has_prompt:
-                    prompt_rel = os.path.relpath(prompt_path, start=out_path.parent)
-                    bits.append(
-                        f"Prompt: <a href='{escape(str(prompt_rel))}' target='_blank'>prompt.txt</a>"
-                    )
-                if has_meta:
-                    meta_rel = os.path.relpath(meta_path, start=out_path.parent)
-                    if bits:
-                        bits.append("·")
-                    bits.append(
-                        f"<a href='{escape(str(meta_rel))}' target='_blank'>meta.json</a>"
-                    )
-                links_html = f"<p class='links'>{' '.join(bits)}</p>"
-
-            parts.append("<div class='section-theme'>")
-            parts.append(
-                f"<h3>{escape(cat_title)}"
-                f"<span class='badge'>{len(files)} image(s)</span></h3>"
-            )
-            if links_html:
-                parts.append(links_html)
-
-            parts.append("<div class='grid'>")
-
-            # Navigation within each category's list of files
-            for idx, img_path in enumerate(files):
-                zoom_dir = zoom_root / date_str / slug
-                zoom_dir.mkdir(parents=True, exist_ok=True)
-                zoom_page = zoom_dir / f"{img_path.stem}.html"
-
-                prev_path = files[idx - 1] if idx > 0 else None
-                next_path = files[idx + 1] if idx < len(files) - 1 else None
-
-                img_rel_from_zoom = os.path.relpath(img_path, start=zoom_page.parent)
-                gallery_rel_from_zoom = os.path.relpath(
-                    out_path, start=zoom_page.parent
-                )
-
-                prev_rel = None
-                next_rel = None
-                if prev_path is not None:
-                    prev_zoom = zoom_dir / f"{prev_path.stem}.html"
-                    prev_rel = os.path.relpath(prev_zoom, start=zoom_page.parent)
-                if next_path is not None:
-                    next_zoom = zoom_dir / f"{next_path.stem}.html"
-                    next_rel = os.path.relpath(next_zoom, start=zoom_page.parent)
-
-                # Build zoom page HTML (with keyboard + wheel navigation)
-                zoom_html: list[str] = []
-                zoom_html.append("<!DOCTYPE html>")
-                zoom_html.append("<html lang='en'>")
-                zoom_html.append("<head>")
-                zoom_html.append("<meta charset='UTF-8'>")
-                zoom_html.append(
-                    f"<title>{escape(cat_title)} – {escape(img_path.name)}</title>"
-                )
-                zoom_html.append(
-                    """
-<style>
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #020617;
-  color: #e5e7eb;
-  margin: 0;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.overlay-btn {
+  padding:0.4rem 1rem;
+  background:#1e293b;
+  border:1px solid #3b82f6;
+  border-radius:999px;
+  color:white;
+  cursor:pointer;
 }
-.header {
-  width: 100%;
-  max-width: 960px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  gap: 0.5rem;
+#overlay .close-btn {
+  position:absolute;
+  top:1rem;
+  right:1rem;
+  font-size:1.5rem;
+  background:none;
+  border:none;
+  color:#f1f5f9;
+  cursor:pointer;
+  font-weight:bold;
 }
-.nav-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  text-decoration: none;
-  border: 1px solid #1e293b;
-  background: #020617;
-  color: #9ca3af;
-  min-width: 80px;
-  text-align: center;
-}
-.nav-btn:hover {
-  background: #111827;
-  color: #e5e7eb;
-  border-color: #1d4ed8;
-}
-.nav-btn.disabled {
-  opacity: 0.35;
-  pointer-events: none;
-}
-.back-btn {
-  border-color: #1d4ed8;
-  color: #bfdbfe;
-}
-.zoom-wrapper {
-  width: 100%;
-  max-width: 1280px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.zoom-img {
-  max-width: 100%;
-  max-height: 90vh;
-  border-radius: 0.75rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.65);
-}
-.filename {
-  margin-top: 0.75rem;
-  font-size: 0.8rem;
-  color: #9ca3af;
-  word-break: break-all;
+#top-btn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#1e293b;
+  color:#fff;
+  border:none;
+  padding:0.5rem 0.8rem;
+  border-radius:999px;
+  cursor:pointer;
+  z-index:10000;
+  font-size:0.9rem;
+  border:1px solid #3b82f6;
 }
 </style>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const prevLink = document.getElementById('prev-link');
-  const nextLink = document.getElementById('next-link');
-
-  function go(direction) {
-    const target = direction < 0 ? prevLink : nextLink;
-    if (!target) return;
-    if (target.tagName !== 'A') return;
-    if (target.classList.contains('disabled')) return;
-    window.location.href = target.href;
-  }
-
-  // Keyboard navigation: ← / →
-  window.addEventListener('keydown', function (e) {
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      go(-1);
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      go(1);
-    }
-  });
-
-  // Mouse wheel (scroll up/down)
-  let lastScroll = 0;
-  window.addEventListener('wheel', function (e) {
-    const now = Date.now();
-    // debounce ~400ms
-    if (now - lastScroll < 400) return;
-
-    if (Math.abs(e.deltaY) < 20) return; // ignore tiny scrolls
-
-    if (e.deltaY > 0) {
-      // scroll down → next
-      go(1);
-    } else {
-      // scroll up → prev
-      go(-1);
-    }
-    lastScroll = now;
-  }, { passive: true });
+let AV_IMAGES = [];
+let AV_INDEX = 0;
+let AV_SCROLL = 0;
+function openOverlay(images, index) {
+  AV_SCROLL = window.scrollY;
+  AV_IMAGES = images;
+  AV_INDEX = index;
+  showImage(0);
+  document.getElementById('overlay').classList.add('open');
+}
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('open');
+  window.scrollTo({ top: AV_SCROLL, behavior: 'instant' });
+}
+function showImage(delta) {
+  let n = AV_INDEX + delta;
+  if (n < 0 || n >= AV_IMAGES.length) return;
+  AV_INDEX = n;
+  const data = AV_IMAGES[n];
+  document.getElementById('overlay-img').src = data.url;
+  document.getElementById('caption').textContent = data.name;
+  document.getElementById('metadata').textContent = `Filename: ${data.name}\nTitle: ${data.title}\nCategory: ${data.category}\nDescription: ${data.description}\nKeywords: ${data.keywords}`;
+}
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('overlay').classList.contains('open')) return;
+  if (e.key === 'Escape') closeOverlay();
+  if (e.key === ' ') { e.preventDefault(); closeOverlay(); }
+  if (e.key === 'ArrowLeft') showImage(-1);
+  if (e.key === 'ArrowRight') showImage(1);
 });
+document.addEventListener('click', e => {
+  const overlay = document.getElementById('overlay');
+  if (!overlay.classList.contains('open')) return;
+  const bounds = overlay.getBoundingClientRect();
+  const x = e.clientX;
+  if (x < bounds.width * 0.3) showImage(-1);
+  else if (x > bounds.width * 0.7) showImage(1);
+});
+document.addEventListener('wheel', e => {
+  const overlay = document.getElementById('overlay');
+  if (!overlay.classList.contains('open')) return;
+  if (e.deltaY < 0) showImage(-1);
+  else if (e.deltaY > 0) showImage(1);
+});
+function showAllTabs() {
+  document.querySelectorAll('.dateblock').forEach(e => e.style.display = 'block');
+  document.querySelectorAll('.grid').forEach(e => e.style.display = 'grid');
+}
 </script>
-"""
-                )
-                zoom_html.append("</head>")
-                zoom_html.append("<body>")
-                zoom_html.append("<div class='header'>")
+</head>
+<body>
+<div id='overlay'>
+  <button class='close-btn' onclick='closeOverlay()'>×</button>
+  <img id='overlay-img' src=''>
+  <div class='caption' id='caption'></div>
+  <div class='meta' id='metadata'></div>
+  <div class='nav'>
+    <button class='overlay-btn' onclick='showImage(-1)'>&larr; Prev</button>
+    <button class='overlay-btn' onclick='closeOverlay()'>Back to Gallery</button>
+    <button class='overlay-btn' onclick='showImage(1)'>Next &rarr;</button>
+  </div>
+</div>
+<button id='top-btn' onclick='scrollToTop()'>↑ Top</button>
+<h1>AutoVisuals Gallery</h1>
+<p>Generated at """ + escape(now) + """</p>
+<div class='tabs'>
+<button onclick='showAllTabs()'>All</button>
+""")
 
-                # Prev button
-                if prev_rel:
-                    zoom_html.append(
-                        f"<a id='prev-link' class='nav-btn' href='{escape(prev_rel)}'>&larr; Prev</a>"
-                    )
-                else:
-                    zoom_html.append(
-                        "<span id='prev-link' class='nav-btn disabled'>&larr; Prev</span>"
-                    )
+    for date, themes in images.items():
+        parts.append(f"<button onclick=\"document.querySelectorAll('.dateblock').forEach(e=>e.style.display='none');document.getElementById('date-{date}').style.display='block'\">{escape(date)}</button>")
+    parts.append("</div>")
 
-                # Back to gallery
-                zoom_html.append(
-                    f"<a class='nav-btn back-btn' href='{escape(gallery_rel_from_zoom)}'>Back to Gallery</a>"
-                )
+    for date, themes in images.items():
+        parts.append(f"<div id='date-{date}' class='dateblock' style='display:none;'>")
+        parts.append("<div class='subtabs'>")
+        for theme in themes:
+            tab_id = f"{date}-{theme}".replace(" ", "_").replace("/", "-")
+            parts.append(f"<button onclick=\"document.querySelectorAll('#date-{date} .grid').forEach(e=>e.style.display='none');document.getElementById('{tab_id}').style.display='grid'\">{escape(theme)}</button>")
+        parts.append(f"<button onclick=\"document.querySelectorAll('#date-{date} .grid').forEach(e=>e.style.display='grid')\">All Themes</button>")
+        parts.append("</div>")
+        for theme, files in themes.items():
+            tab_id = f"{date}-{theme}".replace(" ", "_").replace("/", "-")
+            parts.append(f"<div class='grid' id='{tab_id}'>")
+            img_data = []
+            for p in files:
+                rel = os.path.relpath(p, start=out_path.parent).replace("\\", "/")
+                name = p.name
+                stem_base = "_".join(Path(name).stem.split("_")[:-2])
+                meta = fuzzy_match(stem_base, metadata)
+                img_data.append({
+                    "url": rel,
+                    "name": name,
+                    "title": meta.get("title", ""),
+                    "keywords": meta.get("keywords", ""),
+                    "description": meta.get("description", ""),
+                    "category": meta.get("category", theme)
+                })
+            jdata = json.dumps(img_data)
+            for i, p in enumerate(files):
+                rel = os.path.relpath(p, start=out_path.parent).replace("\\", "/")
+                name = p.name
+                parts.append(f"""
+<div class='card'>
+  <a href='{escape(rel)}' onclick='event.preventDefault(); openOverlay({jdata}, {i});'>
+    <img src='{escape(rel)}'>
+  </a>
+  <div class='filename'>{escape(name)}</div>
+</div>
+""")
+            parts.append("</div>")
+        parts.append("</div>")
 
-                # Next button
-                if next_rel:
-                    zoom_html.append(
-                        f"<a id='next-link' class='nav-btn' href='{escape(next_rel)}'>Next &rarr;</a>"
-                    )
-                else:
-                    zoom_html.append(
-                        "<span id='next-link' class='nav-btn disabled'>Next &rarr;</span>"
-                    )
-
-                zoom_html.append("</div>")  # header
-
-                zoom_html.append("<div class='zoom-wrapper'>")
-                zoom_html.append(
-                    f"<img class='zoom-img' src='{escape(img_rel_from_zoom)}' "
-                    f"alt='{escape(img_path.name)}' />"
-                )
-                zoom_html.append(f"<div class='filename'>{escape(img_path.name)}</div>")
-                zoom_html.append("</div>")
-                zoom_html.append("</body></html>")
-
-                zoom_page.write_text("\n".join(zoom_html), encoding="utf-8")
-
-                # In main gallery: thumbnail → zoom page
-                zoom_rel_from_gallery = os.path.relpath(
-                    zoom_page, start=out_path.parent
-                )
-                img_rel_from_gallery = os.path.relpath(
-                    img_path, start=out_path.parent
-                )
-
-                thumb_img = (
-                    f"<img src='{escape(img_rel_from_gallery)}' "
-                    f"alt='{escape(img_path.name)}' loading='lazy' />"
-                )
-                thumb_html = (
-                    f"<a href='{escape(zoom_rel_from_gallery)}' "
-                    f"target='_blank'>{thumb_img}</a>"
-                )
-
-                parts.append("<div class='card'>")
-                parts.append(thumb_html)
-                parts.append(
-                    f"<span>{escape(str(img_path.relative_to(out_path.parent)))}</span>"
-                )
-                parts.append("</div>")
-
-            parts.append("</div>")  # .grid
-            parts.append("</div>")  # .section-theme
-
-        parts.append("</section>")
+    if images:
+        first_date = next(iter(images))
+        parts.append(f"<script>document.getElementById('date-{first_date}').style.display='block';</script>")
+        first_theme = next(iter(images[first_date]))
+        first_tab = f"{first_date}-{first_theme}".replace(" ", "_").replace("/", "-")
+        parts.append(f"<script>document.getElementById('{first_tab}').style.display='grid';</script>")
 
     parts.append("</body></html>")
-
     out_path.write_text("\n".join(parts), encoding="utf-8")
     return out_path
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--download-root", default="mj_downloads")
+    parser.add_argument("--prompt-root", default="prompt")
+    parser.add_argument("--out", default="mj_gallery.html")
+    args = parser.parse_args()
+    build_gallery(args.download_root, args.prompt_root, args.out)
+    print("Gallery created at:", args.out)
+
+if __name__ == "__main__":
+    main()
