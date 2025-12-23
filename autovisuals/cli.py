@@ -31,7 +31,6 @@ from .gallery import build_gallery
 from .get_meta import generate_stock_metadata
 
 
-
 PROJECT_ROOT = _get_project_root()
 DEFAULT_EXPORT_DIR = "/mnt/c/Users/xilu/Downloads/autovisuals_export"
 DEFAULT_THEME_CSV = "autovisuals/data/adobe_cat.csv"
@@ -81,6 +80,7 @@ def get_prompt_file_for(date: str, category_slug: str) -> Path:
     if not path.exists():
         raise FileNotFoundError(f"No prompt file for {date}/{category_slug}")
     return path
+
 
 # ------------------------------------------------------------------
 # Parser
@@ -295,7 +295,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--export-dir",
         default=DEFAULT_EXPORT_DIR,
         help="export root for upscaled images (absolute path, "
-             "e.g. /mnt/c/Users/xilu/Downloads/autovisuals_export).",
+        "e.g. /mnt/c/Users/xilu/Downloads/autovisuals_export).",
     )
 
     # status
@@ -318,7 +318,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="only show this YYYY-MM-DD date (default: all dates found under prompt/).",
     )
 
-        # meta
+    # meta
     meta = subparsers.add_parser(
         "meta",
         help="Generate Adobe/Shutterstock/Freepik metadata CSVs from downloads + prompt meta.",
@@ -331,7 +331,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     meta.add_argument(
         "--download-dir",
-        default=DEFAULT_DOWNLOAD_DIR,   # whatever constant you already use
+        default=DEFAULT_DOWNLOAD_DIR,  # whatever constant you already use
         help="root folder for downloaded images (default: mj_downloads).",
     )
     meta.add_argument(
@@ -586,7 +586,9 @@ def main():
                 raw_root = PROJECT_ROOT / raw_root
 
             export_root = Path(
-                getattr(args, "export_dir", "/mnt/c/Users/xilu/Downloads/autovisuals_export")
+                getattr(
+                    args, "export_dir", "/mnt/c/Users/xilu/Downloads/autovisuals_export"
+                )
             )
             export_root.mkdir(parents=True, exist_ok=True)
 
@@ -618,7 +620,7 @@ def main():
                     by_cat.setdefault(cat, []).append(img)
 
                 for cat, imgs in by_cat.items():
-                    out_cat_dir = (date_export_dir / cat)
+                    out_cat_dir = date_export_dir / cat
                     out_cat_dir.mkdir(parents=True, exist_ok=True)
                     print(f"[upscale] category {cat}: {len(imgs)} new image(s)")
                     run_realesrgan(
@@ -637,7 +639,6 @@ def main():
             out_file=args.gallery_out,
         )
         print(f"Pipeline complete. Gallery written to: {gallery_path}")
-
 
     elif args.command == "status":
         run_status(

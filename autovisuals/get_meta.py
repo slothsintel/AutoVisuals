@@ -61,6 +61,7 @@ DEFAULT_OUT_ROOT = PROJECT_ROOT / "meta"
 @dataclass
 class CategoryMap:
     """Mapping of category names to Adobe codes and platform categories."""
+
     adobe_cat: str
     adobe_code: int
     shutterstock_cat: str
@@ -343,15 +344,63 @@ def clean_prompt_for_freepik(prompt: str) -> str:
 
 
 ANIMAL_WORDS = [
-    "cat", "dog", "fox", "deer", "antelope", "lion", "tiger", "bear", "wolf", "horse",
-    "zebra", "giraffe", "elephant", "leopard", "cheetah", "monkey", "gorilla", "panda",
-    "kangaroo", "whale", "dolphin", "shark", "eagle", "owl", "penguin", "bird", "wildlife",
+    "cat",
+    "dog",
+    "fox",
+    "deer",
+    "antelope",
+    "lion",
+    "tiger",
+    "bear",
+    "wolf",
+    "horse",
+    "zebra",
+    "giraffe",
+    "elephant",
+    "leopard",
+    "cheetah",
+    "monkey",
+    "gorilla",
+    "panda",
+    "kangaroo",
+    "whale",
+    "dolphin",
+    "shark",
+    "eagle",
+    "owl",
+    "penguin",
+    "bird",
+    "wildlife",
 ]
 
-BUILDING_WORDS = ["building", "tower", "skyscraper", "architecture", "city", "cityscape", "urban"]
+BUILDING_WORDS = [
+    "building",
+    "tower",
+    "skyscraper",
+    "architecture",
+    "city",
+    "cityscape",
+    "urban",
+]
 TECH_WORDS = ["tech", "technology", "circuit", "chip", "data", "server", "digital"]
-GRAPHIC_WORDS = ["background", "pattern", "texture", "graphic", "abstract", "copy space"]
-LANDSCAPE_WORDS = ["landscape", "mountain", "hill", "hillside", "valley", "river", "forest", "meadow"]
+GRAPHIC_WORDS = [
+    "background",
+    "pattern",
+    "texture",
+    "graphic",
+    "abstract",
+    "copy space",
+]
+LANDSCAPE_WORDS = [
+    "landscape",
+    "mountain",
+    "hill",
+    "hillside",
+    "valley",
+    "river",
+    "forest",
+    "meadow",
+]
 
 USE_CASE_PHRASES = [
     "creative layout",

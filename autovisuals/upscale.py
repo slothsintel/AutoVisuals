@@ -69,10 +69,14 @@ def run_realesrgan(
         cmd = [
             python_exe,
             realesrgan_bin,
-            "-i", str(img),
-            "-o", str(output_dir),
-            "-n", model,
-            "-s", str(scale),
+            "-i",
+            str(img),
+            "-o",
+            str(output_dir),
+            "-n",
+            model,
+            "-s",
+            str(scale),
         ]
         if tile > 0:
             cmd.extend(["-t", str(tile)])

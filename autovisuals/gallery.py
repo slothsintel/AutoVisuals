@@ -11,8 +11,10 @@ import csv
 from pathlib import Path
 from typing import Dict, List
 
+
 def escape(s: str) -> str:
     return html.escape(s, quote=True)
+
 
 def collect_images(download_root: Path) -> Dict[str, Dict[str, List[Path]]]:
     exts = {".png", ".jpg", ".jpeg", ".webp"}
@@ -25,13 +27,11 @@ def collect_images(download_root: Path) -> Dict[str, Dict[str, List[Path]]]:
         for cat_dir in sorted(day_dir.iterdir()):
             if not cat_dir.is_dir():
                 continue
-            images = [
-                p for p in sorted(cat_dir.iterdir())
-                if p.suffix.lower() in exts
-            ]
+            images = [p for p in sorted(cat_dir.iterdir()) if p.suffix.lower() in exts]
             if images:
                 out[date][cat_dir.name] = images
     return out
+
 
 def load_metadata(prompt_root: Path) -> Dict[str, Dict[str, str]]:
     meta = {}
@@ -42,7 +42,7 @@ def load_metadata(prompt_root: Path) -> Dict[str, Dict[str, str]]:
             meta_file = theme_dir / "meta.csv"
             if not meta_file.exists():
                 continue
-            with open(meta_file, newline='', encoding='utf-8') as f:
+            with open(meta_file, newline="", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     base_title = row.get("title", "").replace(" ", "_").strip()
@@ -51,9 +51,12 @@ def load_metadata(prompt_root: Path) -> Dict[str, Dict[str, str]]:
                             "title": row.get("title", ""),
                             "keywords": row.get("keywords", ""),
                             "description": row.get("description", ""),
-                            "category": row.get("category") or row.get("theme") or theme_dir.name
+                            "category": row.get("category")
+                            or row.get("theme")
+                            or theme_dir.name,
                         }
     return meta
+
 
 def fuzzy_match(filename: str, metadata: Dict[str, Dict[str, str]]) -> Dict[str, str]:
     for key in metadata:
@@ -61,8 +64,10 @@ def fuzzy_match(filename: str, metadata: Dict[str, Dict[str, str]]) -> Dict[str,
             return metadata[key]
     return {}
 
+
 def build_gallery(download_root, prompt_root, out_file):
     from datetime import datetime
+
     images = collect_images(Path(download_root))
     metadata = load_metadata(Path(prompt_root))
     now = datetime.now().isoformat(timespec="seconds")
@@ -70,7 +75,8 @@ def build_gallery(download_root, prompt_root, out_file):
     out_path = Path(out_file)
     parts: List[str] = []
 
-    parts.append("""
+    parts.append(
+        """
 <!DOCTYPE html>
 <html>
 <head>
@@ -251,13 +257,18 @@ function showAllTabs() {
 </div>
 <button id='top-btn' onclick='scrollToTop()'>↑ Top</button>
 <h1>AutoVisuals Gallery</h1>
-<p>Generated at """ + escape(now) + """</p>
+<p>Generated at """
+        + escape(now)
+        + """</p>
 <div class='tabs'>
 <button onclick='showAllTabs()'>All</button>
-""")
+"""
+    )
 
     for date, themes in images.items():
-        parts.append(f"<button onclick=\"document.querySelectorAll('.dateblock').forEach(e=>e.style.display='none');document.getElementById('date-{date}').style.display='block'\">{escape(date)}</button>")
+        parts.append(
+            f"<button onclick=\"document.querySelectorAll('.dateblock').forEach(e=>e.style.display='none');document.getElementById('date-{date}').style.display='block'\">{escape(date)}</button>"
+        )
     parts.append("</div>")
 
     for date, themes in images.items():
@@ -265,8 +276,12 @@ function showAllTabs() {
         parts.append("<div class='subtabs'>")
         for theme in themes:
             tab_id = f"{date}-{theme}".replace(" ", "_").replace("/", "-")
-            parts.append(f"<button onclick=\"document.querySelectorAll('#date-{date} .grid').forEach(e=>e.style.display='none');document.getElementById('{tab_id}').style.display='grid'\">{escape(theme)}</button>")
-        parts.append(f"<button onclick=\"document.querySelectorAll('#date-{date} .grid').forEach(e=>e.style.display='grid')\">All Themes</button>")
+            parts.append(
+                f"<button onclick=\"document.querySelectorAll('#date-{date} .grid').forEach(e=>e.style.display='none');document.getElementById('{tab_id}').style.display='grid'\">{escape(theme)}</button>"
+            )
+        parts.append(
+            f"<button onclick=\"document.querySelectorAll('#date-{date} .grid').forEach(e=>e.style.display='grid')\">All Themes</button>"
+        )
         parts.append("</div>")
         for theme, files in themes.items():
             tab_id = f"{date}-{theme}".replace(" ", "_").replace("/", "-")
@@ -277,39 +292,48 @@ function showAllTabs() {
                 name = p.name
                 stem_base = "_".join(Path(name).stem.split("_")[:-2])
                 meta = fuzzy_match(stem_base, metadata)
-                img_data.append({
-                    "url": rel,
-                    "name": name,
-                    "title": meta.get("title", ""),
-                    "keywords": meta.get("keywords", ""),
-                    "description": meta.get("description", ""),
-                    "category": meta.get("category", theme)
-                })
+                img_data.append(
+                    {
+                        "url": rel,
+                        "name": name,
+                        "title": meta.get("title", ""),
+                        "keywords": meta.get("keywords", ""),
+                        "description": meta.get("description", ""),
+                        "category": meta.get("category", theme),
+                    }
+                )
             jdata = json.dumps(img_data)
             for i, p in enumerate(files):
                 rel = os.path.relpath(p, start=out_path.parent).replace("\\", "/")
                 name = p.name
-                parts.append(f"""
+                parts.append(
+                    f"""
 <div class='card'>
   <a href='{escape(rel)}' onclick='event.preventDefault(); openOverlay({jdata}, {i});'>
     <img src='{escape(rel)}'>
   </a>
   <div class='filename'>{escape(name)}</div>
 </div>
-""")
+"""
+                )
             parts.append("</div>")
         parts.append("</div>")
 
     if images:
         first_date = next(iter(images))
-        parts.append(f"<script>document.getElementById('date-{first_date}').style.display='block';</script>")
+        parts.append(
+            f"<script>document.getElementById('date-{first_date}').style.display='block';</script>"
+        )
         first_theme = next(iter(images[first_date]))
         first_tab = f"{first_date}-{first_theme}".replace(" ", "_").replace("/", "-")
-        parts.append(f"<script>document.getElementById('{first_tab}').style.display='grid';</script>")
+        parts.append(
+            f"<script>document.getElementById('{first_tab}').style.display='grid';</script>"
+        )
 
     parts.append("</body></html>")
     out_path.write_text("\n".join(parts), encoding="utf-8")
     return out_path
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -319,6 +343,7 @@ def main():
     args = parser.parse_args()
     build_gallery(args.download_root, args.prompt_root, args.out)
     print("Gallery created at:", args.out)
+
 
 if __name__ == "__main__":
     main()

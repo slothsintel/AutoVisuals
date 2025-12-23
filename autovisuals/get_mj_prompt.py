@@ -72,6 +72,7 @@ gemini_client = None
 # Multi-provider call
 # ------------------------------------------------------------------
 
+
 def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
     """
     Call the chosen provider and return parsed JSON dict.
@@ -195,7 +196,6 @@ def call_model(provider: str, system_prompt: str, user_prompt: str) -> dict:
     data["keywords"] = filtered
 
     return data
-
 
 
 # ------------------------------------------------------------------
@@ -448,6 +448,7 @@ FINAL INSTRUCTIONS
 - output must be valid JSON: double quotes, no trailing commas.
 """
 
+
 # ------------------------------------------------------------------
 # Core validation helpers
 # ------------------------------------------------------------------
@@ -505,18 +506,85 @@ def ensure_keywords(data: dict) -> dict:
 
 # Theme-to-camera-specs mapping (case-insensitive theme matching)
 THEME_CAMERA_SPECS = {
-    "animals": {"camera_type": "DSLR wildlife photo", "lens_type": "200mm lens", "aperture": "f/2.8", "iso": "ISO 400", "shutter_speed": "1/1000s"},
-    "buildings-and-architecture": {"camera_type": "mirrorless camera photo", "lens_type": "24mm lens", "aperture": "f/11", "iso": "ISO 100", "shutter_speed": "1/320s"},
-    "business": {"camera_type": "full-frame DSLR photo", "lens_type": "50mm prime lens", "aperture": "f/4", "iso": "ISO 200", "shutter_speed": "1/250s"},
-    "graphic-resources": {"camera_type": "studio macro photo", "lens_type": "100mm lens", "aperture": "f/11", "iso": "ISO 100", "shutter_speed": "1/125s"},
-    "hobbies-and-leisure": {"camera_type": "full-frame DSLR", "lens_type": "35mm lens", "aperture": "f/2.8", "iso": "ISO 200", "shutter_speed": "1/125s"},
-    "landscape": {"camera_type": "full-frame DSLR photo", "lens_type": "24mm lens", "aperture": "f/8", "iso": "ISO 100", "shutter_speed": "1/250s"},
-    "lifestyle": {"camera_type": "full-frame DSLR", "lens_type": "35mm lens", "aperture": "f/2.8", "iso": "ISO 200", "shutter_speed": "1/125s"},
-    "science": {"camera_type": "DSLR wildlife photo", "lens_type": "200mm lens", "aperture": "f/2.8", "iso": "ISO 400", "shutter_speed": "1/1000s"},
-    "sports": {"camera_type": "full-frame DSLR photo", "lens_type": "24mm lens", "aperture": "f/8", "iso": "ISO 100", "shutter_speed": "1/250s"},
-    "technology": {"camera_type": "DSLR wildlife photo", "lens_type": "200mm lens", "aperture": "f/2.8", "iso": "ISO 400", "shutter_speed": "1/1000s"},
-    "travel": {"camera_type": "full-frame DSLR photo", "lens_type": "24mm lens", "aperture": "f/8", "iso": "ISO 100", "shutter_speed": "1/250s"},
+    "animals": {
+        "camera_type": "DSLR wildlife photo",
+        "lens_type": "200mm lens",
+        "aperture": "f/2.8",
+        "iso": "ISO 400",
+        "shutter_speed": "1/1000s",
+    },
+    "buildings-and-architecture": {
+        "camera_type": "mirrorless camera photo",
+        "lens_type": "24mm lens",
+        "aperture": "f/11",
+        "iso": "ISO 100",
+        "shutter_speed": "1/320s",
+    },
+    "business": {
+        "camera_type": "full-frame DSLR photo",
+        "lens_type": "50mm prime lens",
+        "aperture": "f/4",
+        "iso": "ISO 200",
+        "shutter_speed": "1/250s",
+    },
+    "graphic-resources": {
+        "camera_type": "studio macro photo",
+        "lens_type": "100mm lens",
+        "aperture": "f/11",
+        "iso": "ISO 100",
+        "shutter_speed": "1/125s",
+    },
+    "hobbies-and-leisure": {
+        "camera_type": "full-frame DSLR",
+        "lens_type": "35mm lens",
+        "aperture": "f/2.8",
+        "iso": "ISO 200",
+        "shutter_speed": "1/125s",
+    },
+    "landscape": {
+        "camera_type": "full-frame DSLR photo",
+        "lens_type": "24mm lens",
+        "aperture": "f/8",
+        "iso": "ISO 100",
+        "shutter_speed": "1/250s",
+    },
+    "lifestyle": {
+        "camera_type": "full-frame DSLR",
+        "lens_type": "35mm lens",
+        "aperture": "f/2.8",
+        "iso": "ISO 200",
+        "shutter_speed": "1/125s",
+    },
+    "science": {
+        "camera_type": "DSLR wildlife photo",
+        "lens_type": "200mm lens",
+        "aperture": "f/2.8",
+        "iso": "ISO 400",
+        "shutter_speed": "1/1000s",
+    },
+    "sports": {
+        "camera_type": "full-frame DSLR photo",
+        "lens_type": "24mm lens",
+        "aperture": "f/8",
+        "iso": "ISO 100",
+        "shutter_speed": "1/250s",
+    },
+    "technology": {
+        "camera_type": "DSLR wildlife photo",
+        "lens_type": "200mm lens",
+        "aperture": "f/2.8",
+        "iso": "ISO 400",
+        "shutter_speed": "1/1000s",
+    },
+    "travel": {
+        "camera_type": "full-frame DSLR photo",
+        "lens_type": "24mm lens",
+        "aperture": "f/8",
+        "iso": "ISO 100",
+        "shutter_speed": "1/250s",
+    },
 }
+
 
 def classify_theme_for_camera(theme: str) -> str:
     """
@@ -528,50 +596,184 @@ def classify_theme_for_camera(theme: str) -> str:
     t = (theme or "").lower()
 
     # animals / wildlife
-    if any(w in t for w in ["animal", "wildlife", "dog", "cat", "bird", "horse", "fox", "lion"]):
+    if any(
+        w in t
+        for w in ["animal", "wildlife", "dog", "cat", "bird", "horse", "fox", "lion"]
+    ):
         return "animals"
 
     # buildings & architecture / city
-    if any(w in t for w in ["building", "architecture", "city", "urban", "skyline", "skyscraper", "bridge", "street"]):
+    if any(
+        w in t
+        for w in [
+            "building",
+            "architecture",
+            "city",
+            "urban",
+            "skyline",
+            "skyscraper",
+            "bridge",
+            "street",
+        ]
+    ):
         return "buildings-and-architecture"
 
     # landscape / outdoor nature
-    if any(w in t for w in [
-        "forest", "mountain", "valley", "lake", "river", "sea", "ocean",
-        "beach", "sunrise", "sunset", "landscape", "meadow", "field", "countryside"
-    ]):
+    if any(
+        w in t
+        for w in [
+            "forest",
+            "mountain",
+            "valley",
+            "lake",
+            "river",
+            "sea",
+            "ocean",
+            "beach",
+            "sunrise",
+            "sunset",
+            "landscape",
+            "meadow",
+            "field",
+            "countryside",
+        ]
+    ):
         return "landscape"
 
     # travel
-    if any(w in t for w in ["travel", "tourist", "destination", "landmark", "journey", "vacation", "holiday"]):
+    if any(
+        w in t
+        for w in [
+            "travel",
+            "tourist",
+            "destination",
+            "landmark",
+            "journey",
+            "vacation",
+            "holiday",
+        ]
+    ):
         return "travel"
 
     # business / office / finance / workspace
-    if any(w in t for w in ["business", "office", "startup", "meeting", "corporate", "finance", "analytics", "workspace"]):
+    if any(
+        w in t
+        for w in [
+            "business",
+            "office",
+            "startup",
+            "meeting",
+            "corporate",
+            "finance",
+            "analytics",
+            "workspace",
+        ]
+    ):
         return "business"
 
     # technology / digital / data / abstract tech
-    if any(w in t for w in ["tech", "technology", "circuit", "chip", "server", "code", "data", "digital", "ai", "robot", "cyber"]):
+    if any(
+        w in t
+        for w in [
+            "tech",
+            "technology",
+            "circuit",
+            "chip",
+            "server",
+            "code",
+            "data",
+            "digital",
+            "ai",
+            "robot",
+            "cyber",
+        ]
+    ):
         return "technology"
 
     # graphic resources / backgrounds / textures
-    if any(w in t for w in ["background", "texture", "pattern", "abstract", "minimal", "gradient", "geometry", "wallpaper", "seamless"]):
+    if any(
+        w in t
+        for w in [
+            "background",
+            "texture",
+            "pattern",
+            "abstract",
+            "minimal",
+            "gradient",
+            "geometry",
+            "wallpaper",
+            "seamless",
+        ]
+    ):
         return "graphic-resources"
 
     # lifestyle / indoor / cozy interiors
-    if any(w in t for w in ["living room", "interior", "indoor", "home", "kitchen", "bedroom", "sofa", "desk", "cozy", "coffee"]):
+    if any(
+        w in t
+        for w in [
+            "living room",
+            "interior",
+            "indoor",
+            "home",
+            "kitchen",
+            "bedroom",
+            "sofa",
+            "desk",
+            "cozy",
+            "coffee",
+        ]
+    ):
         return "lifestyle"
 
     # hobbies / leisure
-    if any(w in t for w in ["hobby", "leisure", "game", "gaming", "reading", "relaxing", "craft", "diy", "baking"]):
+    if any(
+        w in t
+        for w in [
+            "hobby",
+            "leisure",
+            "game",
+            "gaming",
+            "reading",
+            "relaxing",
+            "craft",
+            "diy",
+            "baking",
+        ]
+    ):
         return "hobbies-and-leisure"
 
     # sports
-    if any(w in t for w in ["sport", "football", "soccer", "basketball", "tennis", "running", "fitness", "gym"]):
+    if any(
+        w in t
+        for w in [
+            "sport",
+            "football",
+            "soccer",
+            "basketball",
+            "tennis",
+            "running",
+            "fitness",
+            "gym",
+        ]
+    ):
         return "sports"
 
     # science
-    if any(w in t for w in ["pen", "chart", "monitor", "lab", "laboratory", "experiment", "microscope", "dna", "molecule", "chemical"]):
+    if any(
+        w in t
+        for w in [
+            "pen",
+            "chart",
+            "monitor",
+            "lab",
+            "laboratory",
+            "experiment",
+            "microscope",
+            "dna",
+            "molecule",
+            "chemical",
+        ]
+    ):
         return "science"
 
     # fallback: safe general bucket
@@ -652,14 +854,12 @@ def make_variant(variant_id: int, theme: str = None) -> dict:
         "season": random.choice(seasons),
         "weather": random.choice(weather_options),
         "palette": random.choice(palettes),
-
         # theme-based camera spec (NOT random anymore)
         "camera_type": camera_spec["camera_type"],
         "lens_type": camera_spec["lens_type"],
         "aperture": camera_spec["aperture"],
         "iso": camera_spec["iso"],
         "shutter_speed": camera_spec["shutter_speed"],
-
         "complexity": random.choice(complexities),
         "variant_id": variant_id,
     }
@@ -774,7 +974,6 @@ def save_prompts(items, path: Path):
     print("saved prompts:", path, "and", latest_path)
 
 
-
 # ------------------------------------------------------------------
 # Theme list loading (weighted)
 # ------------------------------------------------------------------
@@ -829,7 +1028,6 @@ def load_themes_with_weights(csv_path: Path):
     return themes, weights
 
 
-
 # ------------------------------------------------------------------
 # Main orchestration
 # ------------------------------------------------------------------
@@ -841,6 +1039,7 @@ def resolve_output_root(out_arg: str) -> Path:
     """
     root = Path(__file__).resolve().parent.parent
     return (root / out_arg).resolve()
+
 
 def main(
     provider: str,
@@ -914,7 +1113,6 @@ def main(
             rec["prompt"] = attach_id_tag(full_prompt, uid)
             items.append(rec)
 
-
     # random theme (weighted)
     else:
         for i in range(n):
@@ -961,16 +1159,15 @@ def main(
     print("\nall done.")
 
 
-
-
-
 # ------------------------------------------------------------------
 # Stand-alone usage (optional)
 # ------------------------------------------------------------------
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Generate MJ prompts + metadata from theme list.")
+    p = argparse.ArgumentParser(
+        description="Generate MJ prompts + metadata from theme list."
+    )
 
     p.add_argument(
         "--provider",
