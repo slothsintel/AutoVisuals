@@ -341,7 +341,7 @@ sunset over mountains,5
 
 # Contribution
 
-Maintained by **Sloths Visuals** of [**Sloths Intel**](https://github.com/slothsintel), and [**@drxilu**](https://github.com/drxilu).
+Maintained by **Sloths Visuals** of [**Sloths Intel GitHub**](https://github.com/slothsintel), and [**Daddy Sloth Github**](https://github.com/drxilu).
 
 ---
 
@@ -353,7 +353,7 @@ MIT License.
 
 # About Sloths Visuals
 
-A creative visualisation brand under **Sloths Intel**, specialising in data visulisation and automated illustration pipelines.
+A creative visualisation brand under [**Sloths Intel**](https://slothsintel.com/index.html), specialising in data visulisation and automated illustration pipelines.
 <p align="right">
   <a href="#top" style="text-decoration:none;">
     ⬆️
