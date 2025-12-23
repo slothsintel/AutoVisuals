@@ -3,7 +3,7 @@
 # 🦥 AutoVisuals
 ### Automated Illustration & Prompt Generation Engine
 
-<img src='docs/autovisuals_hex_icon_simple.svg' align="right" height="800" />
+<img src="docs/autovisuals_hex_icon_simple.svg" align="right" width="180" />
 
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
