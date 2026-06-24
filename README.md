@@ -5,19 +5,19 @@
 
 <img src="docs/autovisuals_hex_icon_simple.svg" align="right" width="180" />
 
-[![Static Badge](https://img.shields.io/badge/License-Sloxen™-darkgreen)]()
+[![Static Badge](https://img.shields.io/badge/License-Sloxen®-darkgreen)]()
 [![Static Badge](https://img.shields.io/badge/Build-Passing-%23a9f378)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)]()
 [![Status](https://img.shields.io/badge/Project-Active-brightgreen.svg)]()
 
-![Org](https://img.shields.io/badge/Research-Sloxen™-black)
+![Org](https://img.shields.io/badge/Research-Sloxen®-black)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20WSL%20%7C%20macOS-lightgrey.svg)]()
 
 [![Static Badge](https://img.shields.io/badge/Chatbot-OpenAI%20%7C%20Anthropic%20%7C%20Google%20%7C%20Llama%20%7C%20DeepSeek-purple)]()
 
 
-**AutoVisuals**, designed by [**Sloxen™**](https://sloxen.com), is a complete end-to-end [**Hybrid Intelligence System (HISx™)**](https://sloxen.com/products.html) for automated visual content creation: generating structured Midjourney-ready prompts, orchestrating image production via Discord, automatically retrieving and processing outputs, and building production-ready HTML galleries with zoom navigation for business design, internal datasets, Adobe Stock, and other illustration platforms.
+**AutoVisuals**, designed by [**Sloxen®**](https://sloxen.com), is a complete end-to-end [**Hybrid Intelligence System (HISx™)**](https://sloxen.com/products.html) for automated visual content creation: generating structured Midjourney-ready prompts, orchestrating image production via Discord, automatically retrieving and processing outputs, and building production-ready HTML galleries with zoom navigation for business design, internal datasets, Adobe Stock, and other illustration platforms.
 
 ---
 
@@ -342,13 +342,13 @@ sunset over mountains,5
 
 # Contribution
 
-Maintained by [**Sloxen™ GitHub**](https://github.com/sloxen), and [**Daddy Sloth Github**](https://github.com/daddysloth).
+Maintained by [**Sloxen® GitHub**](https://github.com/sloxen), and [**Daddy Sloth Github**](https://github.com/daddysloth).
 
 ---
 
 # License
 
-© 2026 **Sloxen™**.
+© 2026 **Sloxen®**.
 
 A trading name of **Sloxen Ltd**, registered in England and Wales (Company number 16907507).
 
