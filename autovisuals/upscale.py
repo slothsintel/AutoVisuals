@@ -7,6 +7,7 @@ Calls the RealESRGAN inference script located in:
     AutoVisuals/Real-ESRGAN/inference_realesrgan.py
 
 We *ignore* REALESRGAN_BIN environment variable to avoid stale paths.
+All successful outputs are emitted as JPEG files with the `.jpeg` extension.
 """
 
 import subprocess
@@ -41,6 +42,7 @@ def run_realesrgan(
         model = RealESRGAN_x4plus
         scale = 4
         tile = 256
+        output format = JPEG (.jpeg)
     """
 
     output_dir = Path(output_dir)
@@ -77,6 +79,9 @@ def run_realesrgan(
             model,
             "-s",
             str(scale),
+            # Real-ESRGAN accepts "jpg" as its JPEG format selector.
+            "--ext",
+            "jpg",
         ]
         if tile > 0:
             cmd.extend(["-t", str(tile)])
@@ -84,5 +89,13 @@ def run_realesrgan(
         print(f"[upscale] RealESRGAN {img.name} → {output_dir}")
         try:
             subprocess.run(cmd, check=True)
+
+            # The upstream tool writes JPEGs with a .jpg suffix. Rename the
+            # generated file to .jpeg so AutoVisuals has one consistent,
+            # Adobe Stock-ready output extension.
+            jpg_output = output_dir / f"{img.stem}_out.jpg"
+            jpeg_output = jpg_output.with_suffix(".jpeg")
+            if jpg_output.is_file():
+                jpg_output.replace(jpeg_output)
         except subprocess.CalledProcessError as e:
             print(f"[upscale] RealESRGAN failed on {img}: {e}")

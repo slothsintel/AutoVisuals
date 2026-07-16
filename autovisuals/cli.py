@@ -32,8 +32,12 @@ from .get_meta import generate_stock_metadata
 
 
 PROJECT_ROOT = _get_project_root()
-DEFAULT_EXPORT_DIR = "/mnt/c/Users/xilu/Downloads/autovisuals_export"
-DEFAULT_THEME_CSV = "autovisuals/data/adobe_cat.csv"
+DEFAULT_EXPORT_DIR = str(
+    PROJECT_ROOT / "scale"
+)
+DEFAULT_THEME_CSV = str(
+    PROJECT_ROOT / "autovisuals" / "data" / "adobe_cat.csv"
+)
 DEFAULT_OUT_PROMPT = "prompt"
 DEFAULT_DOWNLOAD_DIR = "mj_downloads"
 DEFAULT_GALLERY_HTML = "mj_gallery.html"
@@ -294,8 +298,7 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument(
         "--export-dir",
         default=DEFAULT_EXPORT_DIR,
-        help="export root for upscaled images (absolute path, "
-        "e.g. /mnt/c/Users/xilu/Downloads/autovisuals_export).",
+        help="export path for upscaled images (default: scale/ under project root, relative to project root).",
     )
 
     # status
