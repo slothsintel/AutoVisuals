@@ -15,6 +15,32 @@ from pathlib import Path
 from typing import Iterable
 
 
+# BasicSR 1.4.2 imports a torchvision module removed by modern torchvision.
+# This temporary module alias keeps Real-ESRGAN compatible with the CUDA 12.8
+# PyTorch build needed for NVIDIA RTX 50-series GPUs, without editing files in
+# the active Python environment.
+_BASICSR_COMPAT_LAUNCHER = """
+import runpy
+import sys
+import types
+
+try:
+    import torchvision.transforms.functional_tensor
+except ModuleNotFoundError:
+    from torchvision.transforms.functional import rgb_to_grayscale
+
+    compatibility_module = types.ModuleType(
+        'torchvision.transforms.functional_tensor'
+    )
+    compatibility_module.rgb_to_grayscale = rgb_to_grayscale
+    sys.modules['torchvision.transforms.functional_tensor'] = compatibility_module
+
+script_path = sys.argv[1]
+sys.argv = [script_path, *sys.argv[2:]]
+runpy.run_path(script_path, run_name='__main__')
+"""
+
+
 def _get_project_root() -> Path:
     # upscale.py is inside AutoVisuals/autovisuals/
     return Path(__file__).resolve().parent.parent
@@ -70,6 +96,8 @@ def run_realesrgan(
 
         cmd = [
             python_exe,
+            "-c",
+            _BASICSR_COMPAT_LAUNCHER,
             realesrgan_bin,
             "-i",
             str(img),

@@ -221,8 +221,7 @@ Option:
 --gallery-out     gallery file output directory, mj_gallery.html by default.
 --idle-seconds    downloader idle timeout in seconds to proccess gallery, 120 by default.
 -U, --upscale     optional upscaling step after download (y = RealESRGAN, default: n)..
---export-dir      export root for upscaled images (absolute path,
-                  e.g. /mnt/c/Users/xilu/Downloads/autovisuals_export).
+--export-dir      export path for upscaled images (default: scale/ under project root, relative to project root).
 ```
 
 ## Subcommand
