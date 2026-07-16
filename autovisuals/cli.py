@@ -248,7 +248,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--records",
         type=int,
         default=10,
-        help="number of prompts for each theme and title, 5 by default.",
+        help="number of prompts for each theme and title, 10 by default.",
     )
     pipe.add_argument(
         "-r",
