@@ -626,7 +626,7 @@ def diversify_description_for_filename(
 
 
 def convert_filename_extension(
-    filename: str, new_ext: str = "-standard-scale-4_00x.jpeg"
+    filename: str, new_ext: str = "_out.jpeg"
 ) -> str:
     """
     Convert filename extension to the specified format.
