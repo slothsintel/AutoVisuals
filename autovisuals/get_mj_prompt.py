@@ -43,7 +43,7 @@ BASE_DIR = Path(__file__).resolve().parent  # autovisuals/
 PROJECT_ROOT = BASE_DIR.parent  # AutoVisuals/
 
 DEFAULT_PROVIDER = "openai"
-DEFAULT_MODEL_OPENAI = "gpt-5.6 Terra"
+DEFAULT_MODEL_OPENAI = "gpt-5.6-terra"
 DEFAULT_MODEL_CLAUDE = "claude-3-sonnet-latest"
 DEFAULT_MODEL_GEMINI = "gemini-1.5-flash"
 DEFAULT_MODEL_LLAMA = "llama-4-maverick"
@@ -59,7 +59,7 @@ if not API_KEY:
     raise RuntimeError(
         "please export API_KEY before running.\n"
         "examples:\n"
-        '  export API_KEY="sk-openai-xxxxx"   # openai gpt-5.6 Terra\n'
+        '  export API_KEY="sk-openai-xxxxx"   # openai gpt-5.6-terra\n'
         '  export API_KEY="sk-ant-xxxxx"      # claude 3\n'
         '  export API_KEY="AIza-xxxxx"        # gemini 1.5\n'
     )
